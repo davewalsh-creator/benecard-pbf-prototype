@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benecard PBF — Implementation Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#00853E;
+    --green-2:#007F46;
+    --teal:#028671;
+    --teal-2:#006664;
+    --teal-blue:#006A82;
+    --navy:#004D83;
+    --ink:#3A3A3A;
+    --ink-soft:#6B7280;
+    --ink-faint:#9AA3A6;
+    --paper:#FFFFFF;
+    --surface:#F5F8F6;
+    --surface-2:#EFF3F1;
+    --border:#E1E7E4;
+    --border-strong:#CBD5D1;
+    --amber:#B7791F;
+    --amber-bg:#FBF3E2;
+    --radius-sm:8px;
+    --radius-md:14px;
+    --radius-lg:26px;
+    --shadow:0 1px 2px rgba(16,30,25,.04), 0 6px 20px rgba(16,30,25,.06);
+    --font-display:'Poppins', sans-serif;
+    --font-body:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:var(--surface);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* ===== Shell / global header ===== */
+  .shell{display:flex;flex-direction:column;min-height:100vh;}
+
+  .app-header{
+    height:60px;flex-shrink:0;
+    background:var(--navy);
+    color:#fff;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 24px;
+    position:sticky;top:0;z-index:60;
+  }
+  .header-left{display:flex;align-items:center;gap:30px;min-width:0;}
+  .header-logo{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .header-logo .brand-mark{background:linear-gradient(135deg, var(--green), var(--teal));}
+  .header-logo strong{font-family:var(--font-display);font-weight:600;font-size:14.5px;color:#fff;display:block;line-height:1.2;}
+  .header-logo span{font-size:10.5px;color:rgba(255,255,255,.55);}
+  .header-nav{display:flex;gap:2px;}
+  .header-nav a{
+    color:rgba(255,255,255,.68);
+    font-size:13.5px;font-weight:500;
+    padding:9px 14px;border-radius:8px;
+    text-decoration:none;white-space:nowrap;
+    transition:.15s;
+  }
+  .header-nav a:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .header-nav a.active{background:rgba(255,255,255,.14);color:#fff;font-weight:600;}
+  .header-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .icon-btn{
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);
+    border:none;cursor:pointer;position:relative;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,.16);}
+  .icon-btn .dot{position:absolute;top:6px;right:7px;width:7px;height:7px;background:var(--green);border-radius:50%;border:1.5px solid var(--navy);}
+  .avatar-menu{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 10px 4px 4px;border-radius:20px;}
+  .avatar-menu:hover{background:rgba(255,255,255,.08);}
+  .avatar{width:27px;height:27px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+  .avatar-menu .name{font-size:12.5px;font-weight:500;color:#fff;}
+  .avatar-menu .chev{color:rgba(255,255,255,.55);font-size:9px;}
+
+  /* ===== App shell body ===== */
+  .app{
+    display:grid;
+    grid-template-columns:68px 288px 1fr;
+    flex:1;
+    min-height:0;
+  }
+
+  /* ===== Icon rail ===== */
+  .icon-rail{
+    background:#03294D;
+    display:flex;flex-direction:column;align-items:center;
+    padding:16px 0;gap:4px;
+    position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  }
+  .rail-btn{
+    width:42px;height:42px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    color:rgba(255,255,255,.5);background:transparent;border:none;cursor:pointer;
+    position:relative;
+  }
+  .rail-btn svg{width:19px;height:19px;}
+  .rail-btn .rail-label{
+    position:absolute;left:52px;top:50%;transform:translateY(-50%);
+    background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;
+    padding:6px 10px;border-radius:6px;white-space:nowrap;display:none;z-index:70;
+  }
+  .rail-btn:hover .rail-label{display:block;}
+  .rail-btn:hover{color:#fff;background:rgba(255,255,255,.08);}
+  .rail-btn.active{background:var(--green);color:#fff;}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    background:var(--paper);
+    border-right:1px solid var(--border);
+    padding:22px 20px 24px;
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:60px;
+    height:calc(100vh - 60px);
+    overflow-y:auto;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:6px;
+    padding:0 4px;
+  }
+  .brand-mark{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(135deg, var(--green), var(--navy));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:var(--font-display);font-weight:700;font-size:15px;
+    flex-shrink:0;
+  }
+  .brand-text{line-height:1.15;}
+  .brand-text strong{display:block;font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--ink);}
+  .brand-text span{font-size:11.5px;color:var(--ink-soft);}
+
+  .client-chip{
+    margin:18px 4px 20px;
+    padding:12px 14px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+  }
+  .client-chip .label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:600;}
+  .client-chip .name{font-family:var(--font-display);font-weight:600;font-size:14.5px;margin-top:2px;}
+  .client-chip .meta{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+
+  .nav-label{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--ink-faint);font-weight:700;
+    padding:0 8px;margin:6px 0 10px;
+  }
+  .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;flex:1;}
+  .step-btn{
+    width:100%;
+    display:flex;align-items:center;gap:12px;
+    background:transparent;border:none;cursor:pointer;
+    padding:10px 10px;border-radius:var(--radius-sm);
+    text-align:left;font-family:var(--font-body);
+    color:var(--ink);
+    transition:background .15s ease;
+  }
+  .step-btn:hover{background:var(--surface);}
+  .step-btn.active{background:var(--surface-2);}
+  .step-dot{
+    width:26px;height:26px;border-radius:50%;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;font-weight:700;color:#fff;
+    position:relative;
+  }
+  .step-dot .check{display:none;}
+  .step-btn.complete .step-dot{background:var(--green) !important;}
+  .step-btn.complete .step-dot .num{display:none;}
+  .step-btn.complete .step-dot .check{display:block;}
+  .step-info{flex:1;min-width:0;}
+  .step-title{font-size:13px;font-weight:600;line-height:1.25;}
+  .step-sub{font-size:11px;color:var(--ink-soft);}
+  .step-btn.active .step-title{color:var(--ink);}
+  .step-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;letter-spacing:.02em;flex-shrink:0;}
+  .status-notstarted{background:var(--surface-2);color:var(--ink-faint);}
+  .status-inprogress{background:var(--amber-bg);color:var(--amber);}
+  .status-complete{background:#E4F3EA;color:var(--green);}
+
+  .sidebar-foot{
+    margin-top:16px;padding-top:16px;border-top:1px solid var(--border);
+    font-size:11.5px;color:var(--ink-faint);padding-left:8px;
+  }
+
+  /* ===== Main ===== */
+  .main{display:flex;flex-direction:column;min-height:100vh;}
+  .topbar{
+    background:var(--paper);
+    border-bottom:1px solid var(--border);
+    padding:18px 40px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:24px;
+    position:sticky;top:0;z-index:5;
+  }
+  .topbar-left h1{
+    font-family:var(--font-display);font-size:19px;font-weight:600;margin:0 0 3px;
+  }
+  .topbar-left p{margin:0;font-size:12.5px;color:var(--ink-soft);}
+  .progress-wrap{display:flex;align-items:center;gap:12px;min-width:220px;}
+  .progress-track{
+    flex:1;height:8px;border-radius:20px;background:var(--surface-2);overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;border-radius:20px;
+    background:linear-gradient(90deg, var(--green), var(--teal-blue));
+    transition:width .3s ease;
+  }
+  .progress-pct{font-size:12.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+  .btn{
+    font-family:var(--font-body);
+    font-weight:600;font-size:13.5px;
+    padding:10px 18px;border-radius:24px;
+    border:1px solid var(--border-strong);
+    background:var(--paper);color:var(--ink);
+    cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:all .15s ease;
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--surface);}
+  .btn-primary{
+    background:var(--green);border-color:var(--green);color:#fff;
+  }
+  .btn-primary:hover{background:#00722F;}
+  .btn-ghost{border-color:transparent;}
+
+  .content{
+    padding:32px 40px 100px;
+    max-width:980px;
+  }
+  .step-head{margin-bottom:26px;}
+  .step-head .eyebrow{
+    font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-blue);
+    margin-bottom:6px;
+  }
+  .step-head h2{font-family:var(--font-display);font-size:26px;font-weight:600;margin:0 0 8px;}
+  .step-head p{margin:0;color:var(--ink-soft);font-size:14.5px;max-width:640px;line-height:1.5;}
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:26px 28px;
+    margin-bottom:20px;
+    box-shadow:var(--shadow);
+  }
+  .card-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;gap:12px;}
+  .card-head h3{font-family:var(--font-display);font-size:16.5px;font-weight:600;margin:0;}
+  .card-head .card-note{font-size:12px;color:var(--ink-soft);}
+
+  .field-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px 20px;}
+  .field-grid.single{grid-template-columns:1fr;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.span2{grid-column:1 / -1;}
+  .field label{
+    font-size:12.5px;font-weight:600;color:var(--ink);
+    display:flex;align-items:center;gap:6px;
+  }
+  .field .req{color:#C0392B;}
+  .help-dot{
+    width:15px;height:15px;border-radius:50%;
+    background:var(--surface-2);color:var(--ink-soft);
+    font-size:10px;font-weight:700;
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:help;flex-shrink:0;position:relative;
+  }
+  .help-dot .tip{
+    display:none;position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;font-size:11.5px;font-weight:400;
+    padding:9px 12px;border-radius:8px;width:230px;line-height:1.4;
+    box-shadow:0 8px 20px rgba(0,0,0,.18);z-index:20;
+  }
+  .help-dot:hover .tip{display:block;}
+
+  input[type=text], input[type=number], input[type=date], input[type=tel], select, textarea{
+    font-family:var(--font-body);
+    font-size:13.5px;
+    padding:10px 12px;
+    border:1px solid var(--border-strong);
+    border-radius:var(--radius-sm);
+    background:var(--paper);
+    color:var(--ink);
+    width:100%;
+  }
+  textarea{resize:vertical;min-height:78px;}
+  input:focus, select:focus, textarea:focus{
+    outline:none;border-color:var(--teal-blue);box-shadow:0 0 0 3px rgba(0,106,130,.13);
+  }
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%236B7280'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;}
+  .field .field-hint{font-size:11px;color:var(--ink-faint);}
+
+  /* toggle switch */
+  .switch-row{display:flex;align-items:center;gap:10px;}
+  .switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .track{
+    position:absolute;inset:0;background:var(--border-strong);border-radius:20px;cursor:pointer;transition:.15s;
+  }
+  .switch .track::before{
+    content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;
+    background:#fff;border-radius:50%;transition:.15s;
+    box-shadow:0 1px 2px rgba(0,0,0,.25);
+  }
+  .switch input:checked + .track{background:var(--green);}
+  .switch input:checked + .track::before{transform:translateX(18px);}
+  .switch-label{font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .switch-label.on{color:var(--green);}
+
+  /* info panel (jargon translator / reference) */
+  .info-panel{
+    background:var(--surface);
+    border:1px dashed var(--border-strong);
+    border-radius:var(--radius-md);
+    padding:16px 18px;
+    font-size:12.5px;color:var(--ink-soft);
+    display:flex;gap:12px;align-items:flex-start;
+    margin-bottom:18px;
+  }
+  .info-panel .ico{
+    width:22px;height:22px;border-radius:50%;background:var(--teal-blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;
+  }
+  .info-panel strong{color:var(--ink);}
+
+  /* repeater entries */
+  .entry{
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:18px 20px;
+    margin-bottom:14px;
+    position:relative;
+    background:var(--surface);
+  }
+  .entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .entry-tag{
+    font-size:11px;font-weight:700;color:var(--paper);background:var(--teal-blue);
+    padding:3px 10px;border-radius:20px;letter-spacing:.02em;
+  }
+  .entry-remove{
+    background:none;border:none;color:var(--ink-faint);font-size:12px;cursor:pointer;font-weight:600;
+  }
+  .entry-remove:hover{color:#C0392B;}
+  .add-row{
+    background:none;border:1.5px dashed var(--border-strong);color:var(--teal-blue);
+    font-weight:600;font-size:13px;padding:10px 16px;border-radius:var(--radius-sm);
+    cursor:pointer;width:100%;margin-top:4px;
+  }
+  .add-row:hover{background:var(--surface);border-color:var(--teal-blue);}
+
+  /* category picker (multi-select chips) */
+  .chip-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .chip{
+    padding:7px 14px;border-radius:20px;border:1px solid var(--border-strong);
+    font-size:12.5px;font-weight:600;cursor:pointer;background:var(--paper);color:var(--ink-soft);
+    transition:.12s;
+  }
+  .chip.picked{background:var(--green);border-color:var(--green);color:#fff;}
+  .chip-search{margin-bottom:10px;}
+
+  .footer-nav{
+    position:sticky;bottom:0;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(6px);
+    border-top:1px solid var(--border);
+    padding:16px 40px;
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:8px;
+  }
+
+  /* ===== Breadcrumb bar ===== */
+  .breadcrumb-bar{
+    padding:16px 40px 0;
+    font-size:12.5px;color:var(--ink-soft);
+    display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  }
+  .breadcrumb-bar a{color:var(--teal-blue);text-decoration:none;font-weight:600;}
+  .breadcrumb-bar a:hover{text-decoration:underline;}
+  .breadcrumb-bar .sep{color:var(--ink-faint);}
+  .breadcrumb-bar .current{color:var(--ink);font-weight:600;}
+
+  /* ===== App footer ===== */
+  .app-footer{
+    background:var(--paper);border-top:1px solid var(--border);
+    padding:18px 40px;display:flex;justify-content:space-between;align-items:center;
+    font-size:12px;color:var(--ink-faint);flex-wrap:wrap;gap:8px;
+  }
+  .app-footer .foot-left{display:flex;align-items:center;gap:10px;}
+  .app-footer .foot-links a{color:var(--ink-soft);text-decoration:none;margin-left:18px;font-weight:500;}
+  .app-footer .foot-links a:hover{color:var(--teal-blue);}
+
+  /* ===== Onboarding tour overlay ===== */
+  .onboard-overlay{
+    position:fixed;inset:0;z-index:200;
+    background:radial-gradient(circle at 30% 20%, rgba(0,106,130,.35), rgba(2,10,20,.72) 60%);
+    backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+    animation:onboardFadeIn .35s ease;
+  }
+  .onboard-overlay.hidden{display:none;}
+  @keyframes onboardFadeIn{from{opacity:0;}to{opacity:1;}}
+  .onboard-card{
+    background:var(--paper);
+    border-radius:28px;
+    width:100%;max-width:560px;
+    box-shadow:0 30px 80px rgba(0,20,30,.35);
+    overflow:hidden;
+    position:relative;
+    animation:onboardPop .35s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes onboardPop{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:none;}}
+  .onboard-skip{
+    position:absolute;top:18px;right:18px;z-index:5;
+    background:none;border:none;cursor:pointer;
+    font-size:12.5px;font-weight:600;color:var(--ink-faint);
+    padding:8px 10px;border-radius:8px;
+  }
+  .onboard-skip:hover{background:var(--surface);color:var(--ink-soft);}
+  .onboard-top{
+    padding:44px 44px 0;
+    text-align:center;
+  }
+  .onboard-badge{
+    width:76px;height:76px;border-radius:22px;
+    margin:0 auto 22px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 26px -8px rgba(0,0,0,.35);
+  }
+  .onboard-badge svg{width:34px;height:34px;}
+  .onboard-eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--teal-blue);margin-bottom:8px;
+  }
+  .onboard-title{
+    font-family:var(--font-display);font-size:23px;font-weight:600;
+    margin:0 0 12px;line-height:1.25;
+  }
+  .onboard-body{
+    font-size:14.5px;line-height:1.6;color:var(--ink-soft);
+    max-width:420px;margin:0 auto;
+  }
+  .onboard-visual{
+    margin:26px auto 0;
+    max-width:440px;
+  }
+  .onboard-bottom{
+    padding:30px 44px 36px;
+    display:flex;flex-direction:column;gap:20px;
+  }
+  .onboard-dots{display:flex;justify-content:center;gap:7px;}
+  .onboard-dot{
+    width:7px;height:7px;border-radius:50%;background:var(--border-strong);
+    transition:.2s;cursor:pointer;
+  }
+  .onboard-dot.active{width:22px;border-radius:5px;background:var(--green);}
+  .onboard-nav-row{display:flex;justify-content:space-between;align-items:center;}
+  .onboard-btn{
+    font-family:var(--font-body);font-weight:600;font-size:13.5px;
+    padding:11px 22px;border-radius:24px;border:1px solid var(--border-strong);
+    background:var(--paper);color:var(--ink);cursor:pointer;
+  }
+  .onboard-btn:hover{background:var(--surface);}
+  .onboard-btn.primary{
+    background:var(--green);border-color:var(--green);color:#fff;
+  }
+  .onboard-btn.primary:hover{background:#00722F;}
+  .onboard-btn:disabled{opacity:.35;cursor:default;}
+  .onboard-btn:disabled:hover{background:var(--paper);}
+
+  /* mini feature illustration rows used inside a slide */
+  .feat-row{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:11px 14px;border-radius:14px;background:var(--surface);
+    text-align:left;margin-bottom:8px;
+  }
+  .feat-row .fi{
+    width:26px;height:26px;border-radius:8px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+  }
+  .feat-row .fi svg{width:14px;height:14px;}
+  .feat-row .ft strong{display:block;font-size:12.5px;font-weight:600;color:var(--ink);}
+  .feat-row .ft span{font-size:11.5px;color:var(--ink-soft);line-height:1.4;}
+
+  /* mini UI replicas shown inside onboarding slides */
+  .mini-panel{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:16px;text-align:left;
+  }
+  .mini-step-row{display:flex;align-items:center;gap:10px;padding:7px 4px;}
+  .mini-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;}
+  .mini-step-row .mt{font-size:12.5px;font-weight:600;flex:1;}
+  .mini-status{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;}
+  .mini-field-label{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  .mini-help{width:15px;height:15px;border-radius:50%;background:var(--teal-blue);color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
+  .mini-input{background:#fff;border:1px solid var(--border-strong);border-radius:8px;padding:9px 11px;font-size:12.5px;color:var(--ink-faint);margin-bottom:10px;}
+  .mini-tip{background:var(--ink);color:#fff;font-size:11.5px;line-height:1.45;padding:10px 12px;border-radius:8px;}
+  .mini-entry{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:11.5px;color:var(--ink-soft);display:flex;justify-content:space-between;}
+  .mini-entry strong{color:var(--ink);font-weight:600;}
+  .mini-add{border:1.5px dashed var(--border-strong);border-radius:8px;padding:8px;text-align:center;font-size:11.5px;font-weight:600;color:var(--teal-blue);}
+  .mini-result{background:#fff;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;font-size:12px;padding:0;overflow:hidden;margin-top:-10px;margin-bottom:10px;}
+  .mini-result div{padding:8px 12px;border-top:1px solid var(--border);}
+  .mini-result div.match b{color:var(--green);}
+  .mini-plan-row{display:flex;gap:8px;margin-bottom:10px;}
+  .mini-plan-chip{flex:1;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:11.5px;font-weight:600;text-align:center;}
+
+  /* ===== AI Assist FAB ===== */
+  .ai-fab{
+    position:fixed;right:32px;bottom:88px;z-index:80;
+    width:56px;height:56px;border-radius:50%;
+    background:linear-gradient(135deg, var(--teal-blue), var(--green));
+    border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 14px 28px -8px rgba(0,77,131,.45);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .ai-fab:hover{transform:translateY(-2px);box-shadow:0 18px 34px -8px rgba(0,77,131,.55);}
+  .ai-fab svg{width:24px;height:24px;}
+  .ai-fab .ai-fab-label{
+    position:absolute;right:66px;top:50%;transform:translateY(-50%);
+    background:var(--ink);color:#fff;font-size:12px;font-weight:600;
+    padding:7px 12px;border-radius:8px;white-space:nowrap;display:none;
+  }
+  .ai-fab:hover .ai-fab-label{display:block;}
+
+  /* ===== AI overlay ===== */
+  .ai-overlay{
+    position:fixed;inset:0;z-index:210;
+    background:rgba(3,20,35,.55);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    animation:onboardFadeIn .25s ease;
+  }
+  .ai-overlay.hidden{display:none;}
+  .ai-card{
+    background:var(--paper);border-radius:26px;width:100%;max-width:460px;
+    box-shadow:0 30px 80px rgba(0,20,30,.35);padding:36px 36px 30px;
+    text-align:center;
+    animation:onboardPop .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .ai-badge{
+    width:60px;height:60px;border-radius:18px;margin:0 auto 20px;
+    background:linear-gradient(135deg, var(--teal-blue), var(--green));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 24px -8px rgba(0,77,131,.4);
+  }
+  .ai-badge svg{width:28px;height:28px;}
+  .ai-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-blue);margin-bottom:8px;}
+  .ai-title{font-family:var(--font-display);font-size:20px;font-weight:600;margin:0 0 12px;line-height:1.3;}
+  .ai-body{font-size:13.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 26px;}
+  .ai-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+  .ai-btn{
+    font-family:var(--font-body);font-weight:600;font-size:13.5px;
+    padding:12px 20px;border-radius:24px;border:1px solid var(--border-strong);
+    background:var(--paper);color:var(--ink);cursor:pointer;width:100%;
+  }
+  .ai-btn:hover{background:var(--surface);}
+  .ai-btn.primary{background:var(--green);border-color:var(--green);color:#fff;}
+  .ai-btn.primary:hover{background:#00722F;}
+  .ai-divider{height:1px;background:var(--border);margin:0 0 18px;}
+  .ai-help{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-size:12.5px;color:var(--ink-soft);
+  }
+  .ai-help a{color:var(--teal-blue);font-weight:600;text-decoration:none;}
+  .ai-help a:hover{text-decoration:underline;}
+  .ai-help svg{width:15px;height:15px;flex-shrink:0;}
+
+  /* AI result banner shown in content */
+  .ai-banner{
+    display:flex;align-items:flex-start;gap:12px;
+    background:linear-gradient(135deg, rgba(0,106,130,.08), rgba(0,133,62,.08));
+    border:1px solid rgba(0,106,130,.25);
+    border-radius:var(--radius-md);
+    padding:14px 16px;margin-bottom:20px;
+  }
+  .ai-banner .ico{
+    width:26px;height:26px;border-radius:8px;flex-shrink:0;
+    background:linear-gradient(135deg, var(--teal-blue), var(--green));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ai-banner .ico svg{width:14px;height:14px;}
+  .ai-banner .txt{font-size:12.5px;color:var(--ink);line-height:1.5;flex:1;}
+  .ai-banner .txt strong{font-weight:700;}
+  .ai-banner .close{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:2px;}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr;}
+    .icon-rail{display:none;}
+    .sidebar{display:none;}
+    .content{padding:24px 20px 100px;}
+    .field-grid{grid-template-columns:1fr;}
+    .topbar{padding:16px 20px;flex-wrap:wrap;}
+    .header-nav{display:none;}
+    .app-footer{padding:16px 20px;}
+    .breadcrumb-bar{padding:14px 20px 0;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ================= ONBOARDING TOUR ================= -->
+  <div class="onboard-overlay" id="onboardOverlay">
+    <div class="onboard-card">
+      <button class="onboard-skip" onclick="closeOnboarding()">Skip tour ✕</button>
+      <div id="onboardContent"></div>
+      <div class="onboard-bottom">
+        <div class="onboard-dots" id="onboardDots"></div>
+        <div class="onboard-nav-row">
+          <button class="onboard-btn" id="onboardBack" onclick="onboardStep(-1)">Back</button>
+          <button class="onboard-btn primary" id="onboardNext" onclick="onboardStep(1)">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AI ASSIST OVERLAY ================= -->
+  <div class="ai-overlay hidden" id="aiOverlay">
+    <div class="ai-card">
+      <div class="ai-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
+      </div>
+      <div class="ai-eyebrow">AI Assist</div>
+      <h3 class="ai-title">Populate known information from public sources?</h3>
+      <p class="ai-body">Benecard PBF AI can check publicly available records — like a client's registered business address, employer size, and industry classification — and pre-fill matching fields on this step for you to review. Nothing is saved until you confirm each value.</p>
+      <div class="ai-btns">
+        <button class="ai-btn primary" onclick="applyAIFill()">Yes, populate for me</button>
+        <button class="ai-btn" onclick="closeAIOverlay()">Not now, I'll enter manually</button>
+      </div>
+      <div class="ai-divider"></div>
+      <div class="ai-help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4A8.6 8.6 0 013 11.5 8.4 8.4 0 0111.9 3a8.5 8.5 0 019.1 8.5z"/><path d="M7 12l3 3 7-7"/></svg>
+        <span>Help needed? <a href="#">Talk to your implementation specialist</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= GLOBAL HEADER ================= -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="header-logo">
+        <div>
+          <strong>Benecard PBF</strong>
+          <span>Client Workspace</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="#">Home</a>
+        <a href="#">Clients</a>
+        <a href="#" class="active">Implementations</a>
+        <a href="#">Reports</a>
+        <a href="#">Admin</a>
+      </nav>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" title="Product tour" onclick="openOnboarding()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.2a2.5 2.5 0 014.9.8c0 1.7-2.4 2-2.4 3.5"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="icon-btn" title="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+      <button class="icon-btn" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 004 0"/></svg>
+        <span class="dot"></span>
+      </button>
+      <div class="avatar-menu">
+        <div class="avatar">SG</div>
+        <span class="name">Shannon G.</span>
+        <span class="chev">▾</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= APP BODY ================= -->
+  <div class="app">
+
+    <!-- Icon rail: top-level app sections -->
+    <nav class="icon-rail">
+      <button class="rail-btn" title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+        <span class="rail-label">Home</span>
+      </button>
+      <button class="rail-btn" title="Clients">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.9 2.9-6.2 6.5-6.2s6.5 2.3 6.5 6.2"/><circle cx="18" cy="9" r="2.4"/><path d="M16 13.3c2.6.3 4.5 2.2 4.5 5.2"/></svg>
+        <span class="rail-label">Clients</span>
+      </button>
+      <button class="rail-btn active" title="Implementations">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3.5h6v2H9z"/><path d="M9 11h6M9 15h6M9 19h3"/></svg>
+        <span class="rail-label">Implementations</span>
+      </button>
+      <button class="rail-btn" title="Reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M11 20V4M18 20v-7M2.5 20h19"/></svg>
+        <span class="rail-label">Reports</span>
+      </button>
+      <button class="rail-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        <span class="rail-label">Settings</span>
+      </button>
+    </nav>
+
+    <!-- ================= SIDEBAR (contextual to Implementations) ================= -->
+    <aside class="sidebar">
+      <div class="client-chip">
+        <div class="label">Client</div>
+        <div class="name">Rivertown School District</div>
+        <div class="meta">Go-live: Jan 1, 2027 &nbsp;·&nbsp; Draft</div>
+      </div>
+
+      <div class="nav-label">Setup Steps</div>
+      <ul class="steps" id="stepList"></ul>
+
+      <div class="sidebar-foot">Steps 1–10 shown &nbsp;·&nbsp; Preliminary build</div>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <div class="main">
+      <div class="breadcrumb-bar">
+        <a href="#">Clients</a><span class="sep">/</span>
+        <a href="#">Rivertown School District</a><span class="sep">/</span>
+        <span class="current" id="crumbStep">Client &amp; TPA Setup</span>
+      </div>
+
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1 id="stepHeading">Client &amp; TPA Setup</h1>
+          <p id="stepSub">Step <span id="stepNumLabel">1</span> of 10</p>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+          <div class="progress-pct" id="progressPct">10%</div>
+        </div>
+        <button class="btn">Save draft</button>
+      </div>
+
+      <div class="content" id="content"></div>
+
+      <div class="footer-nav">
+        <button class="btn btn-ghost" id="backBtn">← Back</button>
+        <button class="btn btn-primary" id="nextBtn">Save &amp; continue →</button>
+      </div>
+
+      <button class="ai-fab" onclick="openAIOverlay()" title="AI Assist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
+        <span class="ai-fab-label">AI Assist — populate from public sources</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= APP FOOTER ================= -->
+  <footer class="app-footer">
+    <div class="foot-left">© 2026 Benecard Services, LLC · Client Workspace v0.1 (preliminary)</div>
+    <div class="foot-links">
+      <a href="#">Help Center</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">System Status</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   FIELD / GROUP DEFINITIONS
+   Field types: text, number, date, select, toggle, combo, textarea
+   Group types: normal | repeater | picker | info
+============================================================ */
+
+const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+
+const STEPS = [
+{
+  id:1, title:"Client & TPA Setup", sub:"Tab 1 · Client-TPA-RptOpts",
+  eyebrow:"Client Basics",
+  intro:"The core identity of this client and how they relate to any third-party administrators (TPAs), plus how invoices and billing reports should look.",
+  groups:[
+    {title:"Client Information", fields:[
+      {name:"clientName", label:"Client Name", type:"text", placeholder:"e.g. Rivertown School District"},
+      {name:"clientId", label:"Client ID", type:"text", placeholder:"Auto-assigned"},
+      {name:"acctExec", label:"Account Executive", type:"text"},
+      {name:"clinManager", label:"Clinical Manager", type:"text"},
+      {name:"effDate", label:"Effective Date", type:"date"},
+      {name:"endDate", label:"End Date", type:"date"},
+      {name:"goLiveDate", label:"Go-Live Date", type:"date"},
+      {name:"lob", label:"Line of Business", type:"select", options:["Commercial","Government / Municipal","Taft-Hartley (Union)","Tribal","Retiree"]},
+      {name:"lobEff", label:"Line of Business Effective Date", type:"date"},
+      {name:"lobEnd", label:"Line of Business End Date", type:"date"},
+      {name:"contractStart", label:"Contract Start Date", type:"date"},
+      {name:"contractEnd", label:"Contract End Date", type:"date"},
+    ]},
+    {title:"Customer Details", fields:[
+      {name:"customer", label:"Customer", type:"combo", options:["AVANT HEALTH","PBF","BENECARD","RDS","SUPPLYRX"], help:"Which internal book of business this client is priced and administered under."},
+      {name:"clientOption", label:"Client Option", type:"combo", options:["Standard","Wellness Program","DUR Program","Retiree Surv. Deps","Retirees Alternative","Retirees Standard","Retirees Supplemental","Retirees Tertiary"]},
+      {name:"custServiceNum", label:"Dedicated Customer Service Number", type:"tel", placeholder:"(800) 000-0000"},
+      {name:"tinInd", label:"TIN Indicator", type:"select", options:["Client TIN","Benecard TIN"]},
+      {name:"tin", label:"TIN", type:"text", placeholder:"XX-XXXXXXX"},
+      {name:"employerSize", label:"Employer Size", type:"select", options:["0-19 Employees","20-99 Employees","100+ Employees"]},
+      {name:"smallEmpMedEx", label:"Small Employer Medicare Exception", type:"toggle", help:"Turn on if this client qualifies for the small-employer exception to Medicare Secondary Payer rules."},
+    ]},
+    {title:"TPA Relationships", repeat:true, seed:1, note:"Add a new entry any time a broker or TPA relationship changes — end-dating here keeps a full history instead of just flipping active/inactive.",
+     fields:[
+      {name:"tpaName", label:"TPA / Broker Name", type:"combo", options:["Kissler & Associates","Tiffany Benefits","Heartland Consulting","None"]},
+      {name:"tpaType", label:"Relationship Type", type:"select", options:["Broker","Consultant","Third-Party Administrator","COBRA TPA"]},
+      {name:"planSelType", label:"Plan Selection Type", type:"select", options:["Standard"]},
+      {name:"tpaEff", label:"Effective Date", type:"date"},
+      {name:"tpaEnd", label:"End Date", type:"date", help:"Leave blank while the relationship is active. Adding this date is what closes it out — no more guessing from an active/inactive flag."},
+    ]},
+    {title:"Billing Report Options", fields:[
+      {name:"reportContent", label:"Report Content", type:"select", options:["All","Detail","Summary","None"]},
+      {name:"dispMemberName", label:"Display Member Name", type:"toggle"},
+      {name:"dispCardholder", label:"Display Cardholder Name", type:"toggle"},
+      {name:"dispDrugName", label:"Display Drug Name", type:"toggle"},
+      {name:"dispMedicareFlag", label:"Display Medicare Flag", type:"toggle"},
+      {name:"invoiceLevel", label:"Invoice — Eligibility Count / Total Amount", type:"select", options:["Billing Group Level","Group Level"]},
+      {name:"eligDetail", label:"Eligibility Detail", type:"toggle"},
+      {name:"addlBilling", label:"Additional Billing Information", type:"textarea", span2:true},
+    ]},
+    {title:"Invoice Configuration", fields:[
+      {name:"daysTypeClaims", label:"Days Type — Claims", type:"select", options:["Business","Calendar","Custom"]},
+      {name:"daysDueClaims", label:"Days Due After Receipt — Claims", type:"number"},
+      {name:"customDueClaims", label:"Custom Due Date — Claims", type:"text", placeholder:"e.g. Due Upon Receipt"},
+      {name:"daysTypeAdmin", label:"Days Type — Admin", type:"select", options:["Business","Calendar","Custom"]},
+      {name:"daysDueAdmin", label:"Days Due After Receipt — Admin", type:"number"},
+      {name:"customDueAdmin", label:"Custom Due Date — Admin", type:"text"},
+      {name:"invEff", label:"Effective Date", type:"date"},
+      {name:"invEnd", label:"End Date", type:"date"},
+    ]},
+  ]
+},
+{
+  id:2, title:"Contacts & Billing", sub:"Tab 2 · Contacts-BillingGroups",
+  eyebrow:"Addresses & People",
+  intro:"Where mail and legal correspondence should go, how billing groups are structured, and who to contact for what.",
+  groups:[
+    {title:"Client Mailing Address", fields:[
+      {name:"mAddr1", label:"Address 1", type:"text"},
+      {name:"mAddr2", label:"Address 2", type:"text"},
+      {name:"mCity", label:"City", type:"text"},
+      {name:"mState", label:"State", type:"combo", options:US_STATES},
+      {name:"mZip", label:"Zip Code", type:"text"},
+      {name:"mZip4", label:"Zip + 4", type:"text"},
+      {name:"mCountry", label:"Country", type:"select", options:["United States","Puerto Rico","U.S. Virgin Islands","U.S. Minor Outlying Islands"]},
+      {name:"mEff", label:"Effective Date", type:"date"},
+    ]},
+    {title:"Client Legal Address (Domiciled)", fields:[
+      {name:"lAddr1", label:"Address 1", type:"text"},
+      {name:"lAddr2", label:"Address 2", type:"text"},
+      {name:"lCity", label:"City", type:"text"},
+      {name:"lState", label:"State", type:"combo", options:US_STATES},
+      {name:"lZip", label:"Zip Code", type:"text"},
+      {name:"lCountry", label:"Country", type:"select", options:["United States","Puerto Rico","U.S. Virgin Islands"]},
+    ]},
+    {title:"Billing Groups", repeat:true, seed:1, note:"Each billing group can have its own address, cycle, and payment method.",
+     fields:[
+      {name:"bgId", label:"Billing Group ID", type:"text"},
+      {name:"bgName", label:"Billing Group Name", type:"text"},
+      {name:"accessKey", label:"Access Key", type:"text"},
+      {name:"cycleType", label:"Cycle Type", type:"select", options:["Bi-Monthly","Monthly","Specific Dates","Weekly"]},
+      {name:"cycleDates", label:"Cycle Dates", type:"text", placeholder:"e.g. 15; EOM"},
+      {name:"payMethod", label:"Payment Method", type:"select", options:["ACH Debit","Check","Wire"]},
+      {name:"payType", label:"Pay Type", type:"select", options:["Calculate","Don't Pay","Pay Always"]},
+      {name:"cobraTpa", label:"COBRA TPA on File", type:"toggle"},
+      {name:"bgEff", label:"Effective Date", type:"date"},
+      {name:"bgEnd", label:"End Date", type:"date"},
+      {name:"bgComment", label:"Comment", type:"textarea", span2:true},
+    ]},
+    {title:"Contacts & Associations", repeat:true, seed:2,
+     fields:[
+      {name:"contactType", label:"Contact Type", type:"combo", options:["Billing","Broker","Clinical","Contract","Customer Services","Eligibility","*FSA","*ID Card Request","Mailing","Office","Other","RDS","Retiree TPA","*Returned Mail","*TMOOP Vendor","TPA"]},
+      {name:"firstName", label:"First Name", type:"text"},
+      {name:"lastName", label:"Last Name", type:"text"},
+      {name:"attnTo", label:"Attention To", type:"text"},
+      {name:"phone", label:"Phone Number", type:"tel"},
+      {name:"phoneType", label:"Phone Type", type:"select", options:["Fax","Landline","Mobile"]},
+      {name:"email", label:"Email Address", type:"text"},
+      {name:"terminate", label:"Terminate This Contact", type:"toggle", help:"Turning this on retires the contact as of today rather than deleting their history."},
+    ]},
+    {title:"Drug Type Reference", info:true,
+     body:"Used elsewhere in this setup — Mail vs. Retail can each be Brand or Generic, and generic gets further split into Maintenance, Preventative, and Specialty. You don't need to enter anything here; it's just a quick reference for terms you'll see on later steps."}
+  ]
+},
+{
+  id:3, title:"Plans", sub:"Tab 3 · Plans",
+  eyebrow:"Plan Design",
+  intro:"Define every plan this client offers. Everything from Groups onward will reference the plans you set up here — a client can have more than one.",
+  groups:[
+    {title:"Plans", repeat:true, seed:1, note:"Add one entry per plan this client offers.",
+     fields:[
+      {name:"planName", label:"Plan Name", type:"text", placeholder:"e.g. PPO Base Plan"},
+      {name:"adultDep", label:"Adult Dependent Coverage", type:"toggle"},
+      {name:"disabledDep", label:"Disabled Dependent Coverage", type:"toggle"},
+      {name:"retireeCov", label:"Retiree Coverage", type:"toggle"},
+      {name:"depAgeCalcType", label:"Dependent Age Calculation Type", type:"select", options:["As Of Birthdate","As Of End Of Birth Month","As Of End Of Birth Year"]},
+      {name:"depAgeLimit", label:"Dependent Age Limit", type:"number", placeholder:"26"},
+      {name:"studentAgeCalcType", label:"Student Age Calculation Type", type:"select", options:["As Of Birthdate","As Of End Of Birth Month","As Of End Of Birth Year"]},
+      {name:"studentAgeLimit", label:"Student Age Limit", type:"number", placeholder:"26"},
+      {name:"dawOption", label:"Dispense-As-Written (DAW) Option", type:"select", help:"DAW rules apply when a doctor or member specifically requests the brand-name drug instead of an available generic.", options:["Dispense As Written – Exclude","DAW – Use Brand Copay","DAW – Use Generic Copay","Mandatory Generic – Exclude","Mandatory Generic – Use Brand Copay","Mandatory Generic – Use Generic Copay","Standard Plan"]},
+      {name:"dawPharmacies", label:"DAW Applies To", type:"select", options:["Both","Mail Order Only","Retail Only"]},
+      {name:"directClaimBasis", label:"Direct Claim Reimbursement Basis", type:"select", options:["Pharmacy Level","Submitted Amount","Submitted Amount Less Copay","None"]},
+    ]},
+  ]
+},
+{
+  id:4, title:"Groups & TPA", sub:"Tab 4 · Groups + 4T · TPA",
+  eyebrow:"Enrollment Groups",
+  intro:"Groups are the enrollment units under each plan — most clients use these to separate divisions, unions, or locations. Each group can also have its own TPA.",
+  groups:[
+    {title:"Groups", repeat:true, seed:1, note:"Plan Name pulls from the plans you defined in the previous step.",
+     fields:[
+      {name:"groupPlanName", label:"Plan Name", type:"select", options:["— pulled from Plans step —"]},
+      {name:"groupName", label:"Group Name", type:"text"},
+      {name:"groupId", label:"Group ID", type:"text"},
+      {name:"groupType", label:"Type", type:"select", options:["COBRA","OAD","Retiree","Standard","Tribal"]},
+      {name:"groupOption", label:"Group Option", type:"select", options:["Use Client Option","Exclude From Load"]},
+      {name:"olaElig", label:"Allow Online Eligibility Updates", type:"toggle"},
+      {name:"olaOverride", label:"Allow Online Eligibility Override", type:"toggle"},
+      {name:"termByAbsence", label:"Term By Absence", type:"toggle", help:"Automatically term a member's coverage if they stop appearing on eligibility files."},
+      {name:"billingGroupId", label:"Billing Group", type:"select", options:["— pulled from Contacts & Billing step —"]},
+      {name:"groupEff", label:"Group Effective Date", type:"date"},
+      {name:"groupEnd", label:"Group End Date", type:"date"},
+    ]},
+    {title:"Group TPA Assignments", repeat:true, seed:1,
+     fields:[
+      {name:"tpaGroupName", label:"Group", type:"select", options:["— pulled from Groups above —"]},
+      {name:"tpaName2", label:"TPA Name", type:"combo", options:["Kissler & Associates","Tiffany Benefits","Heartland Consulting"]},
+      {name:"tpaType2", label:"TPA Type", type:"select", options:["Eligibility","Billing","COBRA","Full Service"]},
+      {name:"tpaEff2", label:"Effective Date", type:"date"},
+      {name:"tpaEnd2", label:"End Date", type:"date"},
+    ]},
+  ]
+},
+{
+  id:5, title:"Drug Coverage", sub:"Tab 5 · Drug Cov_1", 
+  eyebrow:"Coverage Templates",
+  intro:"Choose which drug categories apply to this client, then set the mail and retail rules for each. Pick categories first — you'll only configure the ones you select.",
+  groups:[
+    {title:"Coverage Template", fields:[
+      {name:"templateName", label:"Template Name", type:"text"},
+      {name:"appliesTo", label:"Applies To", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"medicareDOnly", label:"Medicare Part D Only Template", type:"toggle"},
+      {name:"templateEff", label:"Effective Date", type:"date"},
+      {name:"templateEnd", label:"End Date", type:"date"},
+    ]},
+    {title:"Primary Drug Categories", picker:true,
+     options:["Ged Injectables","Ged Non Injectables","Allergy Serum","Alternative Medications","Anabolic Steroids","Antiretrovirals","Asthma","Biologicals","Blood And Blood Plasma","Cancer Medications Oral","Cancer Medications Non Oral","Contraceptive Injectables","Contraceptive Non Injectables","Diabetic Medications","Fertility Injectables","Fertility Non Injectables","Gene Therapy","Growth Hormones","Immunosuppressives","Insulin","Mental Health","Migraine Injectables","Migraine Non Injectables","Weight Loss"],
+     note:"Selected categories get a Mail / Retail rule row below."},
+    {title:"Secondary Categories", fields:[
+      {name:"secCatNote", label:"Secondary Category Rules", type:"textarea", span2:true, placeholder:"e.g. Compounds — excluded from Mail, covered at Retail with prior authorization.", help:"Covers items like Compounds, DESI Medications, IV Medications, OTC, and Vaccines."},
+    ]},
+    {title:"Preventative Care Categories", fields:[
+      {name:"prevCatNote", label:"Preventative Care Rules", type:"textarea", span2:true, placeholder:"e.g. PC – Contraceptives — covered ages 10–100, no PA required.", help:"ACA preventative categories (Aspirin, Contraceptives, Statins, Vaccines, etc.) with their own age, gender, and quantity rules."},
+    ]},
+  ]
+},
+{
+  id:6, title:"Special Instructions", sub:"Tab 6 · Special Instructions",
+  eyebrow:"Notes",
+  intro:"Free-form notes for anything that doesn't fit a structured field. These get read by the ops team during setup, so keep them specific.",
+  groups:[
+    {title:"Special Instructions — Set #1", fields:[
+      {name:"si1Plan", label:"Applies To", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"si1Text", label:"Instructions", type:"textarea", span2:true},
+    ]},
+    {title:"Special Instructions — Set #2", fields:[
+      {name:"si2Plan", label:"Applies To", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"si2Text", label:"Instructions", type:"textarea", span2:true},
+    ]},
+    {title:"Special Instructions — Set #3", fields:[
+      {name:"si3Plan", label:"Applies To", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"si3Text", label:"Instructions", type:"textarea", span2:true},
+    ]},
+  ]
+},
+{
+  id:7, title:"Limits & Programs", sub:"Tab 7 · Limits-MM-Starter-CPN",
+  eyebrow:"Dispensing Rules",
+  intro:"How much members can fill at once, whether mail order is required, starter-dose rules for certain drug classes, and which pricing network applies.",
+  groups:[
+    {title:"Plan Limits", repeat:true, seed:1, fields:[
+      {name:"planLimitPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"dispType", label:"Dispensing Type", type:"select", options:["Retail","Mail","Specialty Retail","Specialty Mail"]},
+      {name:"daysSupply", label:"Days Supply", type:"number"},
+      {name:"limitUnits", label:"Dispensing Limit Units", type:"number"},
+      {name:"dispLogic", label:"Dispensing Logic", type:"select", options:["Flat"]},
+      {name:"refillLimit", label:"Refill Limit", type:"number", placeholder:"99"},
+      {name:"networkGroup", label:"Network Group", type:"text"},
+    ]},
+    {title:"Mandatory Mail", fields:[
+      {name:"mandMail", label:"Mandatory Mail Program", type:"toggle"},
+      {name:"mandBy", label:"Mandatory By", type:"select", options:["Fill Count","Days Supply"]},
+      {name:"allowRetailFills", label:"Allowable Retail Fills", type:"number"},
+      {name:"posOverrides", label:"Allowable POS Overrides (Maintenance)", type:"number"},
+      {name:"lookBackDays", label:"Look Back Days", type:"number", placeholder:"180"},
+      {name:"allowedRetailNetwork", label:"Allowed Retail Network Group", type:"text"},
+    ]},
+    {title:"Starter Dose", repeat:true, seed:1, fields:[
+      {name:"starterPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"starterTemplate", label:"Starter Dose Template", type:"combo", options:["PBF Opioid","Benzodiazepines","Cancer Medication","Maintenance 30","Maintenance 90","Oral Contraceptives","Sleep Aids","Spec Starter Dose"]},
+      {name:"starterPriority", label:"Priority", type:"number"},
+      {name:"starterLookBack", label:"Look Back Days", type:"number"},
+      {name:"starterLookBackLevel", label:"Look Back Level", type:"select", options:["GPI-2","GPI-4","GPI-10"], help:"GPI = Generic Product Identifier. Higher numbers look at more specific drug groupings."},
+      {name:"starterDispType", label:"Dispensing Type", type:"select", options:["Both","Mail","Retail"]},
+      {name:"starterCopayOpt", label:"Copay Option", type:"select", options:["Prorate","Use Existing Copay"]},
+    ]},
+    {title:"Client Pricing Network (CPN)", repeat:true, seed:1, fields:[
+      {name:"cpnPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"cpnNetwork", label:"Client Network", type:"combo", options:["CPN Teamsters Local 830","CPN Toms River","CPN Value Drug","CPN Value Drug Client – No MO","CPN WHIRLEY","Fixed Rate Heartland","HEARTLAND","FSL","None"]},
+      {name:"cpnEff", label:"Effective Date", type:"date"},
+      {name:"cpnEnd", label:"End Date", type:"date"},
+    ]},
+  ]
+},
+{
+  id:8, title:"Formulary & Utilization", sub:"Tab 8 · Frmly-Step-PA-Qty-HC Reform",
+  eyebrow:"Utilization Management",
+  intro:"Which drug list this client follows, when a prior authorization or step therapy is required, and healthcare-reform status flags.",
+  groups:[
+    {title:"Formulary", fields:[
+      {name:"formulary", label:"Formulary", type:"combo", options:["Standard Formulary","Value Formulary","Custom Formulary"]},
+      {name:"formPriority", label:"Priority", type:"number"},
+      {name:"formEff", label:"Effective Date", type:"date"},
+      {name:"formEnd", label:"End Date", type:"date"},
+    ]},
+    {title:"Step Therapy", fields:[
+      {name:"stepCoverage", label:"Step Therapy Coverage", type:"select", options:["Enabled","Disabled"]},
+      {name:"stepPriority", label:"Priority", type:"number"},
+      {name:"paWithAlt", label:"Allow PA With Alternative", type:"toggle"},
+    ]},
+    {title:"Prior Authorization Drug List", fields:[
+      {name:"paList", label:"PA Drug List", type:"combo", options:["Standard PA List","Specialty PA List"]},
+      {name:"paPriority", label:"Priority", type:"number"},
+      {name:"paGrandfather", label:"Grandfather Existing Members", type:"toggle"},
+    ]},
+    {title:"Quantity Limits", fields:[
+      {name:"qlTemplate", label:"Quantity Limits Template", type:"combo", options:["Standard QL","Opioid QL","Custom QL"]},
+      {name:"qlPriority", label:"Priority", type:"number"},
+    ]},
+    {title:"Healthcare Reform Status", fields:[
+      {name:"erisa", label:"ERISA Group", type:"toggle", help:"Employee Retirement Income Security Act — governs most private-employer health plans."},
+      {name:"nonFedGov", label:"Non-Federal Government Entity", type:"toggle"},
+      {name:"grandfather", label:"Grandfather Status", type:"toggle", help:"A 'grandfathered' plan is exempt from certain ACA requirements because it hasn't changed significantly since March 2010."},
+      {name:"aca", label:"Affordable Care Act (ACA) Plan", type:"toggle"},
+    ]},
+    {title:"Drug Exclusions", fields:[
+      {name:"exclSource", label:"Drug Exclusion Source", type:"combo", options:["Standard Exclusion List","Custom Exclusion List"]},
+      {name:"exclEff", label:"Effective Date", type:"date"},
+      {name:"exclEnd", label:"End Date", type:"date"},
+      {name:"rejectMsg", label:"Custom Reject Message", type:"text", span2:true},
+    ]},
+  ]
+},
+{
+  id:9, title:"Accumulators", sub:"Tab 9 · Accums-Maximizer",
+  eyebrow:"Deductibles & Out-of-Pocket",
+  intro:"Deductibles, out-of-pocket maximums, and any copay assistance / maximizer programs.",
+  groups:[
+    {title:"Deductible (STD)", repeat:true, seed:1, fields:[
+      {name:"stdPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"stdAlias", label:"Alias Name", type:"text"},
+      {name:"stdFrequency", label:"Frequency", type:"select", options:["Annual","Plan Year","Calendar Year"]},
+      {name:"stdSingle", label:"Single Limit ($)", type:"number"},
+      {name:"stdFamily", label:"Family Total Limit ($)", type:"number"},
+      {name:"stdExcludeMoop", label:"Exclude From MOOP", type:"toggle"},
+      {name:"stdResets", label:"Resets on Group Change", type:"toggle"},
+    ]},
+    {title:"Maximum Out-of-Pocket (MOOP)", repeat:true, seed:1, fields:[
+      {name:"moopPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"moopAlias", label:"Alias Name", type:"text"},
+      {name:"moopSingle", label:"Single Limit ($)", type:"number"},
+      {name:"moopFamily", label:"Family Total Limit ($)", type:"number"},
+      {name:"moopResets", label:"Resets on Group Change", type:"toggle"},
+    ]},
+    {title:"Maximum Paid By Plan (MPP)", repeat:true, seed:1, fields:[
+      {name:"mppPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"mppAlias", label:"Alias Name", type:"text"},
+      {name:"mppSingle", label:"Single Limit ($)", type:"number"},
+      {name:"mppUnlimited", label:"Unlimited Cap", type:"toggle"},
+    ]},
+    {title:"Assistance / Maximizer Program", repeat:true, seed:1, fields:[
+      {name:"asstPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"asstProgram", label:"Program", type:"combo", options:["Copay Maximizer","Manufacturer Assistance","Variable Copay"]},
+      {name:"asstPhone", label:"Phone Number", type:"tel"},
+      {name:"asstReject", label:"Reject Claim With Message", type:"toggle"},
+    ]},
+  ]
+},
+{
+  id:10, title:"Copays", sub:"Tab 10 · Copays_1",
+  eyebrow:"Member Cost Share",
+  intro:"What members pay at the register — flat copays, percentage coinsurance, or a mix — by drug type and category.",
+  groups:[
+    {title:"Copay Plan Settings", fields:[
+      {name:"copayPlan", label:"Plan", type:"select", options:["ALL PLANS","— specific plan —"]},
+      {name:"rxPlanType", label:"Rx Plan Type", type:"select", options:["2-Tier","3-Tier","4-Tier","Generics Plus","Extra Coverage List"]},
+      {name:"threshold", label:"Threshold Amount", type:"number", help:"Only applies to Generics Plus plan types."},
+      {name:"prevCareEffect", label:"Preventative Care In Effect", type:"toggle", checked:true},
+      {name:"copayAncillary", label:"Copay Includes Ancillary Charges", type:"toggle"},
+      {name:"dawBasedCopay", label:"DAW-Based Copay", type:"toggle"},
+    ]},
+    {title:"Copay Rules", repeat:true, seed:2, fields:[
+      {name:"copayDispType", label:"Dispense Type", type:"select", options:["Retail","Mail","Specialty"]},
+      {name:"copayDrugType", label:"Drug Type", type:"select", options:["Brand","Generic"]},
+      {name:"copayDaysSupply", label:"Days Supply", type:"number"},
+      {name:"copayOption", label:"Copay Option", type:"select", options:["Flat","Percentage"]},
+      {name:"flatCopay", label:"Flat Copay ($)", type:"number"},
+      {name:"pctCopay", label:"% Copay", type:"number"},
+      {name:"pctMin", label:"% Min $", type:"number"},
+      {name:"pctMax", label:"% Max $", type:"number"},
+      {name:"copayNetwork", label:"Network Group", type:"text"},
+    ]},
+  ]
+},
+];
+
+/* ============================================================
+   RENDERING
+============================================================ */
+let currentStep = 1;
+const completedSteps = new Set();
+const repeaterCounts = {}; // key: stepId-groupIdx -> count
+
+function fieldHTML(f, uid){
+  const help = f.help ? `<span class="help-dot">?<span class="tip">${f.help}</span></span>` : '';
+  const label = `<label>${f.label}${help}</label>`;
+  const span = f.span2 ? ' span2' : '';
+  let control = '';
+  switch(f.type){
+    case 'select':
+      control = `<select id="${uid}">${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`;
+      break;
+    case 'combo':
+      control = `<input type="text" id="${uid}" list="${uid}-list" placeholder="Type to search…">
+                 <datalist id="${uid}-list">${f.options.map(o=>`<option value="${o}">`).join('')}</datalist>`;
+      break;
+    case 'toggle':
+      control = `<div class="switch-row">
+                   <label class="switch"><input type="checkbox" id="${uid}" ${f.checked?'checked':''} onchange="this.closest('.switch-row').querySelector('.switch-label').classList.toggle('on', this.checked); this.closest('.switch-row').querySelector('.switch-label').textContent = this.checked?'Yes':'No'"><span class="track"></span></label>
+                   <span class="switch-label ${f.checked?'on':''}">${f.checked?'Yes':'No'}</span>
+                 </div>`;
+      break;
+    case 'textarea':
+      control = `<textarea id="${uid}" placeholder="${f.placeholder||''}"></textarea>`;
+      break;
+    case 'number':
+      control = `<input type="number" id="${uid}" placeholder="${f.placeholder||''}">`;
+      break;
+    case 'date':
+      control = `<input type="date" id="${uid}">`;
+      break;
+    case 'tel':
+      control = `<input type="tel" id="${uid}" placeholder="${f.placeholder||''}">`;
+      break;
+    default:
+      control = `<input type="text" id="${uid}" placeholder="${f.placeholder||''}">`;
+  }
+  return `<div class="field${span}">${label}${control}</div>`;
+}
+
+function renderNormalGroup(g, stepId, gi){
+  return `<div class="card">
+    <div class="card-head"><h3>${g.title}</h3>${g.note?`<span class="card-note">${g.note}</span>`:''}</div>
+    <div class="field-grid">
+      ${g.fields.map((f,fi)=>fieldHTML(f, `s${stepId}g${gi}f${fi}`)).join('')}
+    </div>
+  </div>`;
+}
+
+function renderInfoGroup(g){
+  return `<div class="info-panel"><span class="ico">i</span><div><strong>${g.title}.</strong> ${g.body}</div></div>`;
+}
+
+function renderPickerGroup(g, stepId, gi){
+  const key = `${stepId}-${gi}`;
+  const chips = g.options.map((o,oi)=>`<span class="chip" data-key="${key}" data-idx="${oi}" onclick="togglePickerChip(this)">${o}</span>`).join('');
+  return `<div class="card">
+    <div class="card-head"><h3>${g.title}</h3>${g.note?`<span class="card-note">${g.note}</span>`:''}</div>
+    <input type="text" class="chip-search" placeholder="Search categories…" oninput="filterChips(this)">
+    <div class="chip-picker">${chips}</div>
+    <div class="field-hint">Selected categories will show mail/retail rule fields here in the full build.</div>
+  </div>`;
+}
+
+function renderRepeaterEntry(g, stepId, gi, entryIdx){
+  const fields = g.fields.map((f,fi)=>fieldHTML(f, `s${stepId}g${gi}e${entryIdx}f${fi}`)).join('');
+  return `<div class="entry" data-entry>
+    <div class="entry-head">
+      <span class="entry-tag">Entry ${entryIdx+1}</span>
+      <button class="entry-remove" onclick="this.closest('[data-entry]').remove()">Remove</button>
+    </div>
+    <div class="field-grid">${fields}</div>
+  </div>`;
+}
+
+function renderRepeaterGroup(g, stepId, gi){
+  const key = `${stepId}-${gi}`;
+  const seed = g.seed || 1;
+  repeaterCounts[key] = seed;
+  let entries = '';
+  for(let i=0;i<seed;i++){ entries += renderRepeaterEntry(g, stepId, gi, i); }
+  return `<div class="card">
+    <div class="card-head"><h3>${g.title}</h3>${g.note?`<span class="card-note">${g.note}</span>`:''}</div>
+    <div id="repwrap-${key}">${entries}</div>
+    <button class="add-row" onclick="addRepeaterRow('${key}', ${stepId}, ${gi})">+ Add another entry</button>
+  </div>`;
+}
+
+function addRepeaterRow(key, stepId, gi){
+  const step = STEPS.find(s=>s.id===stepId);
+  const g = step.groups[gi];
+  const idx = repeaterCounts[key];
+  repeaterCounts[key] = idx + 1;
+  document.getElementById(`repwrap-${key}`).insertAdjacentHTML('beforeend', renderRepeaterEntry(g, stepId, gi, idx));
+}
+
+function togglePickerChip(el){ el.classList.toggle('picked'); }
+function filterChips(input){
+  const term = input.value.toLowerCase();
+  const wrap = input.nextElementSibling;
+  [...wrap.children].forEach(chip=>{
+    chip.style.display = chip.textContent.toLowerCase().includes(term) ? '' : 'none';
+  });
+}
+
+function renderStep(stepId){
+  const step = STEPS.find(s=>s.id===stepId);
+  currentStep = stepId;
+
+  document.getElementById('stepHeading').textContent = step.title;
+  document.getElementById('crumbStep').textContent = step.title;
+  document.getElementById('stepNumLabel').textContent = step.id;
+  document.getElementById('progressFill').style.width = (step.id/10*100)+'%';
+  document.getElementById('progressPct').textContent = Math.round(step.id/10*100)+'%';
+
+  const groupsHTML = step.groups.map((g,gi)=>{
+    if(g.info) return renderInfoGroup(g);
+    if(g.picker) return renderPickerGroup(g, step.id, gi);
+    if(g.repeat) return renderRepeaterGroup(g, step.id, gi);
+    return renderNormalGroup(g, step.id, gi);
+  }).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="step-head">
+      <div class="eyebrow">${step.eyebrow}</div>
+      <h2>${step.title}</h2>
+      <p>${step.intro}</p>
+    </div>
+    ${groupsHTML}
+  `;
+
+  document.getElementById('backBtn').disabled = step.id===1;
+  document.getElementById('backBtn').style.opacity = step.id===1 ? .4 : 1;
+  document.getElementById('nextBtn').textContent = step.id===10 ? 'Save & finish' : 'Save & continue →';
+
+  renderSidebar();
+  window.scrollTo(0,0);
+}
+
+function renderSidebar(){
+  const list = document.getElementById('stepList');
+  list.innerHTML = STEPS.map(s=>{
+    const isActive = s.id===currentStep;
+    const isComplete = completedSteps.has(s.id);
+    let statusClass = 'status-notstarted', statusText='Not started';
+    if(isComplete){statusClass='status-complete'; statusText='Complete';}
+    else if(isActive){statusClass='status-inprogress'; statusText='In progress';}
+    return `<li>
+      <button class="step-btn ${isActive?'active':''} ${isComplete?'complete':''}" onclick="renderStep(${s.id})">
+        <span class="step-dot" style="background:${stepColor(s.id)}">
+          <span class="num">${s.id}</span>
+          <span class="check">✓</span>
+        </span>
+        <span class="step-info">
+          <span class="step-title">${s.title}</span>
+        </span>
+      </button>
+    </li>`;
+  }).join('');
+}
+
+function stepColor(id){
+  const ramp = ['#00853E','#007F46','#00794D','#007255','#006C5D','#006664','#00606C','#005974','#00537B','#004D83'];
+  return ramp[(id-1) % ramp.length];
+}
+
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  if(currentStep>1) renderStep(currentStep-1);
+});
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  completedSteps.add(currentStep);
+  if(currentStep<10) renderStep(currentStep+1);
+  else renderSidebar();
+});
+
+/* ============================================================
+   ONBOARDING TOUR
+============================================================ */
+const ONBOARD_SLIDES = [
+  {
+    color:'#00853E',
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>`,
+    eyebrow:'Welcome',
+    title:'A guided workspace, not a spreadsheet',
+    body:'This prototype turns Benecard\u2019s 19-tab Implementation Guide into a step-by-step workspace \u2014 built for implementation and client-success teams, not spreadsheet experts.',
+    visual:null
+  },
+  {
+    color:'#028671',
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 11h6M9 15h6M9 19h3"/></svg>`,
+    eyebrow:'Feature 1',
+    title:'Ten tabs become one guided path',
+    body:'Every tab from the original workbook is now a step in the left sidebar, with status that updates itself \u2014 no more manually color-coding cells to see what\u2019s done.',
+    visual:`<div class="mini-panel">
+      <div class="mini-step-row"><span class="mini-dot" style="background:#00853E">✓</span><span class="mt">Client &amp; TPA Setup</span><span class="mini-status" style="background:#E4F3EA;color:#00853E">Complete</span></div>
+      <div class="mini-step-row"><span class="mini-dot" style="background:#007F46">2</span><span class="mt">Contacts &amp; Billing</span><span class="mini-status" style="background:#FBF3E2;color:#B7791F">In progress</span></div>
+      <div class="mini-step-row"><span class="mini-dot" style="background:#00794D">3</span><span class="mt">Plans</span><span class="mini-status" style="background:#EFF3F1;color:#9AA3A6">Not started</span></div>
+    </div>`
+  },
+  {
+    color:'#006A82',
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 9.2a2.5 2.5 0 014.9.8c0 1.7-2.4 2-2.4 3.5"/><circle cx="12" cy="17" r=".6" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="9.5"/></svg>`,
+    eyebrow:'Feature 2',
+    title:'Jargon gets translated as you go',
+    body:'Terms like DAW, GPI, MOOP, and ERISA get a plain-language explanation right where you need it \u2014 no separate glossary to go hunt down.',
+    visual:`<div class="mini-panel">
+      <div class="mini-field-label">Dispense-As-Written (DAW) Option <span class="mini-help">?</span></div>
+      <div class="mini-input">Standard Plan ▾</div>
+      <div class="mini-tip">DAW rules apply when a doctor or member specifically requests the brand-name drug instead of an available generic.</div>
+    </div>`
+  },
+  {
+    color:'#00537B',
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.6"/><rect x="4" y="13" width="16" height="6" rx="1.6"/></svg>`,
+    eyebrow:'Feature 3',
+    title:'Add only what you need',
+    body:'Repeatable data \u2014 TPAs, contacts, plans, copay rules \u2014 became stacked cards you add one at a time, instead of one impossibly wide spreadsheet row.',
+    visual:`<div class="mini-panel">
+      <div class="mini-entry"><span><strong>Kissler &amp; Associates</strong> \u00b7 Broker</span><span>Ends 6/30/26</span></div>
+      <div class="mini-entry"><span><strong>Heartland Consulting</strong> \u00b7 TPA</span><span>Active</span></div>
+      <div class="mini-add">+ Add another entry</div>
+    </div>`
+  },
+  {
+    color:'#004D83',
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg>`,
+    eyebrow:'Feature 4',
+    title:'Type to find it, don\u2019t hunt for it',
+    body:'Long lists \u2014 pricing networks, formularies, drug categories \u2014 are now searchable, instead of scrolling a 50-item dropdown.',
+    visual:`<div class="mini-panel">
+      <div class="mini-field-label">Client Network (CPN)</div>
+      <div class="mini-input" style="margin-bottom:0;border-radius:8px 8px 0 0;">Va|</div>
+      <div class="mini-result">
+        <div class="match"><b>Va</b>lue Drug</div>
+        <div class="match"><b>Va</b>lue Drug Client \u2013 No MO</div>
+      </div>
+    </div>`
+  },
+  {
+    color:'#00853E',
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M11 20V4M18 20v-7M2.5 20h19"/></svg>`,
+    eyebrow:'Feature 5',
+    title:'Built to fix real gaps we heard about',
+    body:'Clients can now have more than one plan, and every TPA or broker relationship can finally get an end date \u2014 straight from this year\u2019s discovery calls.',
+    visual:`<div class="mini-panel">
+      <div class="mini-plan-row">
+        <div class="mini-plan-chip">PPO Base Plan</div>
+        <div class="mini-plan-chip">HDHP Plan</div>
+      </div>
+      <div class="mini-entry"><span><strong>Tiffany Benefits</strong> \u00b7 Broker</span><span>End Date: 3/14/26</span></div>
+    </div>`
+  },
+];
+
+let onboardIdx = 0;
+
+function renderOnboard(){
+  const s = ONBOARD_SLIDES[onboardIdx];
+  document.getElementById('onboardContent').innerHTML = `
+    <div class="onboard-top">
+      <div class="onboard-badge" style="background:${s.color}">${s.icon}</div>
+      <div class="onboard-eyebrow">${s.eyebrow}</div>
+      <h2 class="onboard-title">${s.title}</h2>
+      <p class="onboard-body">${s.body}</p>
+      ${s.visual ? `<div class="onboard-visual">${s.visual}</div>` : ''}
+    </div>
+  `;
+  document.getElementById('onboardDots').innerHTML = ONBOARD_SLIDES.map((_,i)=>
+    `<span class="onboard-dot ${i===onboardIdx?'active':''}" onclick="onboardGo(${i})"></span>`
+  ).join('');
+  document.getElementById('onboardBack').disabled = onboardIdx===0;
+  document.getElementById('onboardNext').textContent = onboardIdx===ONBOARD_SLIDES.length-1 ? 'Get started' : 'Next';
+}
+function onboardStep(dir){
+  const next = onboardIdx + dir;
+  if(next < 0) return;
+  if(next > ONBOARD_SLIDES.length-1){ closeOnboarding(); return; }
+  onboardIdx = next;
+  renderOnboard();
+}
+function onboardGo(i){ onboardIdx = i; renderOnboard(); }
+function closeOnboarding(){
+  document.getElementById('onboardOverlay').classList.add('hidden');
+  try{ localStorage.setItem('bcpbf_tour_seen','1'); }catch(e){}
+}
+function openOnboarding(){
+  onboardIdx = 0;
+  renderOnboard();
+  document.getElementById('onboardOverlay').classList.remove('hidden');
+}
+(function initOnboarding(){
+  renderOnboard();
+  let seen = false;
+  try{ seen = localStorage.getItem('bcpbf_tour_seen') === '1'; }catch(e){}
+  if(seen) document.getElementById('onboardOverlay').classList.add('hidden');
+})();
+
+/* ============================================================
+   AI ASSIST
+============================================================ */
+function openAIOverlay(){ document.getElementById('aiOverlay').classList.remove('hidden'); }
+function closeAIOverlay(){ document.getElementById('aiOverlay').classList.add('hidden'); }
+
+function applyAIFill(){
+  closeAIOverlay();
+  const content = document.getElementById('content');
+  const existing = document.getElementById('aiFillBanner');
+  if(existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.className = 'ai-banner';
+  banner.id = 'aiFillBanner';
+  banner.innerHTML = `
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/></svg></span>
+    <span class="txt"><strong>AI found matches for 3 fields</strong> on this step from public records — review the values before saving.</span>
+    <button class="close" onclick="this.closest('.ai-banner').remove()">✕</button>
+  `;
+  content.insertBefore(banner, content.firstChild);
+}
+
+renderStep(1);
+</script>
+</body>
+</html>
