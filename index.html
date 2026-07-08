@@ -24,6 +24,8 @@
     --border-strong:#CBD5D1;
     --amber:#B7791F;
     --amber-bg:#FBF3E2;
+    --danger:#C0392B;
+    --danger-bg:#FBEAE9;
     --radius-sm:8px;
     --radius-md:14px;
     --radius-lg:26px;
@@ -595,6 +597,110 @@
   .ai-banner .txt strong{font-weight:700;}
   .ai-banner .close{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:2px;}
 
+  /* ===== Sidebar view tabs ===== */
+  .view-tabs{display:flex;gap:4px;background:var(--surface);border-radius:10px;padding:3px;margin:0 4px 18px;}
+  .view-tab{
+    flex:1;border:none;background:transparent;cursor:pointer;
+    font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--ink-soft);
+    padding:8px 6px;border-radius:8px;
+  }
+  .view-tab.active{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+  /* ===== Salesforce source badge ===== */
+  .src-badge{
+    display:inline-flex;align-items:center;gap:3px;
+    font-size:9.5px;font-weight:700;letter-spacing:.01em;
+    color:var(--teal-blue);background:rgba(0,106,130,.09);
+    padding:2px 7px;border-radius:20px;text-transform:none;
+  }
+
+  /* ===== Dashboard ===== */
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .stat-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;box-shadow:var(--shadow);}
+  .stat-card .num{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--ink);}
+  .stat-card .lbl{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .stat-card.accent-amber .num{color:var(--amber);}
+  .stat-card.accent-danger .num{color:var(--danger);}
+  .stat-card.accent-green .num{color:var(--green);}
+
+  .dash-note{
+    display:flex;align-items:center;gap:10px;
+    background:var(--surface);border:1px dashed var(--border-strong);border-radius:var(--radius-md);
+    padding:12px 16px;font-size:12.5px;color:var(--ink-soft);margin-bottom:20px;
+  }
+
+  .impl-table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);}
+  .impl-table th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);
+    padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface);
+  }
+  .impl-table td{padding:15px 18px;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink);vertical-align:middle;}
+  .impl-table tr:last-child td{border-bottom:none;}
+  .impl-row{cursor:pointer;transition:background .12s;}
+  .impl-row:hover{background:var(--surface);}
+  .impl-name{font-weight:600;}
+  .impl-owner{color:var(--ink-soft);font-size:12.5px;}
+  .mini-progress{width:110px;height:7px;border-radius:20px;background:var(--surface-2);overflow:hidden;}
+  .mini-progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg, var(--green), var(--teal-blue));}
+  .status-pill{font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;display:inline-block;}
+  .status-pill.on-track{background:#E4F3EA;color:var(--green);}
+  .status-pill.at-risk{background:var(--amber-bg);color:var(--amber);}
+  .status-pill.delayed{background:var(--danger-bg);color:var(--danger);}
+  .status-pill.complete{background:#E4EEF6;color:var(--navy);}
+
+  /* ===== Change history table ===== */
+  .hist-table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);}
+  .hist-table th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);
+    padding:13px 16px;border-bottom:1px solid var(--border);background:var(--surface);
+  }
+  .hist-table td{padding:13px 16px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--ink);vertical-align:top;}
+  .hist-table tr:last-child td{border-bottom:none;}
+  .hist-ts{color:var(--ink-faint);font-size:11.5px;white-space:nowrap;}
+  .hist-step{font-size:10.5px;font-weight:700;color:var(--teal-blue);background:rgba(0,106,130,.08);padding:2px 8px;border-radius:20px;display:inline-block;}
+  .hist-from{color:var(--ink-faint);text-decoration:line-through;}
+  .hist-to{color:var(--green);font-weight:600;}
+  .hist-by{color:var(--ink-soft);font-size:12px;}
+
+  /* ===== Validate overlay ===== */
+  .val-overlay{
+    position:fixed;inset:0;z-index:210;background:rgba(3,20,35,.55);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;padding:24px;animation:onboardFadeIn .25s ease;
+  }
+  .val-overlay.hidden{display:none;}
+  .val-card{
+    background:var(--paper);border-radius:26px;width:100%;max-width:540px;
+    box-shadow:0 30px 80px rgba(0,20,30,.35);padding:32px 34px 28px;
+    animation:onboardPop .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .val-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;}
+  .val-badge{
+    width:46px;height:46px;border-radius:14px;flex-shrink:0;
+    background:linear-gradient(135deg, var(--teal-blue), var(--navy));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .val-badge svg{width:22px;height:22px;}
+  .val-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-blue);margin-bottom:4px;}
+  .val-title{font-family:var(--font-display);font-size:18.5px;font-weight:600;margin:0 0 6px;}
+  .val-summary{font-size:12.5px;color:var(--ink-soft);}
+  .val-list{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .val-item{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:12px;background:var(--surface);font-size:12.5px;line-height:1.5;color:var(--ink);}
+  .val-ico{width:19px;height:19px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff;margin-top:1px;}
+  .val-ico.pass{background:var(--green);}
+  .val-ico.warn{background:var(--amber);}
+  .val-ico.fail{background:var(--danger);}
+  .val-foot-note{font-size:11px;color:var(--ink-faint);margin-bottom:18px;font-style:italic;}
+  .val-btn{
+    font-family:var(--font-body);font-weight:600;font-size:13.5px;width:100%;
+    padding:12px 20px;border-radius:24px;border:1px solid var(--green);
+    background:var(--green);color:#fff;cursor:pointer;
+  }
+  .val-btn:hover{background:#00722F;}
+
+  @media (max-width:900px){
+    .stat-row{grid-template-columns:1fr 1fr;}
+  }
+
   @media (max-width:900px){
     .app{grid-template-columns:1fr;}
     .icon-rail{display:none;}
@@ -647,6 +753,25 @@
     </div>
   </div>
 
+  <!-- ================= VALIDATE FOR PBF OVERLAY ================= -->
+  <div class="val-overlay hidden" id="valOverlay">
+    <div class="val-card">
+      <div class="val-head">
+        <div class="val-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div>
+          <div class="val-eyebrow">Data Validation</div>
+          <h3 class="val-title">PBF Load Readiness Check</h3>
+          <div class="val-summary" id="valSummary"></div>
+        </div>
+      </div>
+      <ul class="val-list" id="valList"></ul>
+      <div class="val-foot-note">Preview only — these checks mirror what PBF's loader validates, shown here so issues surface before load, not after.</div>
+      <button class="val-btn" onclick="closeValidate()">Got it</button>
+    </div>
+  </div>
+
   <!-- ================= GLOBAL HEADER ================= -->
   <header class="app-header">
     <div class="header-left">
@@ -688,7 +813,7 @@
 
     <!-- Icon rail: top-level app sections -->
     <nav class="icon-rail">
-      <button class="rail-btn" title="Home">
+      <button class="rail-btn" id="railHome" title="Home" onclick="switchView('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
         <span class="rail-label">Home</span>
       </button>
@@ -696,7 +821,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.9 2.9-6.2 6.5-6.2s6.5 2.3 6.5 6.2"/><circle cx="18" cy="9" r="2.4"/><path d="M16 13.3c2.6.3 4.5 2.2 4.5 5.2"/></svg>
         <span class="rail-label">Clients</span>
       </button>
-      <button class="rail-btn active" title="Implementations">
+      <button class="rail-btn active" id="railImpl" title="Implementations" onclick="switchView('wizard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3.5h6v2H9z"/><path d="M9 11h6M9 15h6M9 19h3"/></svg>
         <span class="rail-label">Implementations</span>
       </button>
@@ -711,11 +836,16 @@
     </nav>
 
     <!-- ================= SIDEBAR (contextual to Implementations) ================= -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="client-chip">
         <div class="label">Client</div>
-        <div class="name">Rivertown School District</div>
-        <div class="meta">Go-live: Jan 1, 2027 &nbsp;·&nbsp; Draft</div>
+        <div class="name" id="clientChipName">Rivertown School District</div>
+        <div class="meta">Go-live: Oct 1, 2026 &nbsp;·&nbsp; Draft</div>
+      </div>
+
+      <div class="view-tabs" id="viewTabs">
+        <button class="view-tab active" onclick="switchView('wizard')">Setup</button>
+        <button class="view-tab" onclick="switchView('history')">Change History</button>
       </div>
 
       <div class="nav-label">Setup Steps</div>
@@ -726,10 +856,10 @@
 
     <!-- ================= MAIN ================= -->
     <div class="main">
-      <div class="breadcrumb-bar">
-        <a href="#">Clients</a><span class="sep">/</span>
-        <a href="#">Rivertown School District</a><span class="sep">/</span>
-        <span class="current" id="crumbStep">Client &amp; TPA Setup</span>
+      <div class="breadcrumb-bar" id="breadcrumbBar">
+        <a href="#" onclick="switchView('dashboard');return false;">Clients</a><span class="sep">/</span>
+        <a href="#" onclick="switchView('wizard');return false;">Rivertown School District</a><span class="sep">/</span>
+        <span class="current">Client &amp; TPA Setup</span>
       </div>
 
       <div class="topbar">
@@ -737,21 +867,25 @@
           <h1 id="stepHeading">Client &amp; TPA Setup</h1>
           <p id="stepSub">Step <span id="stepNumLabel">1</span> of 10</p>
         </div>
-        <div class="progress-wrap">
+        <div class="progress-wrap" id="progressWrap">
           <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
           <div class="progress-pct" id="progressPct">10%</div>
         </div>
+        <button class="btn" id="validateBtn" onclick="openValidate()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+          Validate for PBF
+        </button>
         <button class="btn">Save draft</button>
       </div>
 
       <div class="content" id="content"></div>
 
-      <div class="footer-nav">
+      <div class="footer-nav" id="footerNav">
         <button class="btn btn-ghost" id="backBtn">← Back</button>
         <button class="btn btn-primary" id="nextBtn">Save &amp; continue →</button>
       </div>
 
-      <button class="ai-fab" onclick="openAIOverlay()" title="AI Assist">
+      <button class="ai-fab" id="aiFabBtn" onclick="openAIOverlay()" title="AI Assist">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
         <span class="ai-fab-label">AI Assist — populate from public sources</span>
       </button>
@@ -786,26 +920,26 @@ const STEPS = [
   intro:"The core identity of this client and how they relate to any third-party administrators (TPAs), plus how invoices and billing reports should look.",
   groups:[
     {title:"Client Information", fields:[
-      {name:"clientName", label:"Client Name", type:"text", placeholder:"e.g. Rivertown School District"},
-      {name:"clientId", label:"Client ID", type:"text", placeholder:"Auto-assigned"},
-      {name:"acctExec", label:"Account Executive", type:"text"},
+      {name:"clientName", label:"Client Name", type:"text", placeholder:"e.g. Rivertown School District", value:"Rivertown School District", source:"sf"},
+      {name:"clientId", label:"Client ID", type:"text", placeholder:"Auto-assigned", value:"CL-10482", source:"sf"},
+      {name:"acctExec", label:"Account Executive", type:"text", value:"Marcus Bell", source:"sf"},
       {name:"clinManager", label:"Clinical Manager", type:"text"},
       {name:"effDate", label:"Effective Date", type:"date"},
       {name:"endDate", label:"End Date", type:"date"},
-      {name:"goLiveDate", label:"Go-Live Date", type:"date"},
-      {name:"lob", label:"Line of Business", type:"select", options:["Commercial","Government / Municipal","Taft-Hartley (Union)","Tribal","Retiree"]},
+      {name:"goLiveDate", label:"Go-Live Date", type:"date", value:"2026-10-01"},
+      {name:"lob", label:"Line of Business", type:"select", options:["Commercial","Government / Municipal","Taft-Hartley (Union)","Tribal","Retiree"], value:"Government / Municipal", source:"sf"},
       {name:"lobEff", label:"Line of Business Effective Date", type:"date"},
       {name:"lobEnd", label:"Line of Business End Date", type:"date"},
       {name:"contractStart", label:"Contract Start Date", type:"date"},
       {name:"contractEnd", label:"Contract End Date", type:"date"},
     ]},
     {title:"Customer Details", fields:[
-      {name:"customer", label:"Customer", type:"combo", options:["AVANT HEALTH","PBF","BENECARD","RDS","SUPPLYRX"], help:"Which internal book of business this client is priced and administered under."},
+      {name:"customer", label:"Customer", type:"combo", options:["AVANT HEALTH","PBF","BENECARD","RDS","SUPPLYRX"], help:"Which internal book of business this client is priced and administered under.", value:"BENECARD", source:"sf"},
       {name:"clientOption", label:"Client Option", type:"combo", options:["Standard","Wellness Program","DUR Program","Retiree Surv. Deps","Retirees Alternative","Retirees Standard","Retirees Supplemental","Retirees Tertiary"]},
-      {name:"custServiceNum", label:"Dedicated Customer Service Number", type:"tel", placeholder:"(800) 000-0000"},
+      {name:"custServiceNum", label:"Dedicated Customer Service Number", type:"tel", placeholder:"(800) 000-0000", value:"(800) 555-0148", source:"sf"},
       {name:"tinInd", label:"TIN Indicator", type:"select", options:["Client TIN","Benecard TIN"]},
-      {name:"tin", label:"TIN", type:"text", placeholder:"XX-XXXXXXX"},
-      {name:"employerSize", label:"Employer Size", type:"select", options:["0-19 Employees","20-99 Employees","100+ Employees"]},
+      {name:"tin", label:"TIN", type:"text", placeholder:"XX-XXXXXXX", value:"84-1029384", source:"sf"},
+      {name:"employerSize", label:"Employer Size", type:"select", options:["0-19 Employees","20-99 Employees","100+ Employees"], value:"100+ Employees", source:"sf"},
       {name:"smallEmpMedEx", label:"Small Employer Medicare Exception", type:"toggle", help:"Turn on if this client qualifies for the small-employer exception to Medicare Secondary Payer rules."},
     ]},
     {title:"TPA Relationships", repeat:true, seed:1, note:"Add a new entry any time a broker or TPA relationship changes — end-dating here keeps a full history instead of just flipping active/inactive.",
@@ -844,13 +978,13 @@ const STEPS = [
   intro:"Where mail and legal correspondence should go, how billing groups are structured, and who to contact for what.",
   groups:[
     {title:"Client Mailing Address", fields:[
-      {name:"mAddr1", label:"Address 1", type:"text"},
+      {name:"mAddr1", label:"Address 1", type:"text", value:"215 Rivertown Pkwy", source:"sf"},
       {name:"mAddr2", label:"Address 2", type:"text"},
-      {name:"mCity", label:"City", type:"text"},
-      {name:"mState", label:"State", type:"combo", options:US_STATES},
-      {name:"mZip", label:"Zip Code", type:"text"},
+      {name:"mCity", label:"City", type:"text", value:"Rivertown", source:"sf"},
+      {name:"mState", label:"State", type:"combo", options:US_STATES, value:"NJ", source:"sf"},
+      {name:"mZip", label:"Zip Code", type:"text", value:"08753", source:"sf"},
       {name:"mZip4", label:"Zip + 4", type:"text"},
-      {name:"mCountry", label:"Country", type:"select", options:["United States","Puerto Rico","U.S. Virgin Islands","U.S. Minor Outlying Islands"]},
+      {name:"mCountry", label:"Country", type:"select", options:["United States","Puerto Rico","U.S. Virgin Islands","U.S. Minor Outlying Islands"], value:"United States"},
       {name:"mEff", label:"Effective Date", type:"date"},
     ]},
     {title:"Client Legal Address (Domiciled)", fields:[
@@ -1132,15 +1266,17 @@ const repeaterCounts = {}; // key: stepId-groupIdx -> count
 
 function fieldHTML(f, uid){
   const help = f.help ? `<span class="help-dot">?<span class="tip">${f.help}</span></span>` : '';
-  const label = `<label>${f.label}${help}</label>`;
+  const badge = f.source==='sf' ? `<span class="src-badge">⟲ From Salesforce</span>` : '';
+  const label = `<label>${f.label}${help}${badge}</label>`;
   const span = f.span2 ? ' span2' : '';
+  const val = f.value !== undefined ? f.value : '';
   let control = '';
   switch(f.type){
     case 'select':
-      control = `<select id="${uid}">${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`;
+      control = `<select id="${uid}">${f.options.map(o=>`<option ${o===f.value?'selected':''}>${o}</option>`).join('')}</select>`;
       break;
     case 'combo':
-      control = `<input type="text" id="${uid}" list="${uid}-list" placeholder="Type to search…">
+      control = `<input type="text" id="${uid}" list="${uid}-list" value="${val}" placeholder="Type to search…">
                  <datalist id="${uid}-list">${f.options.map(o=>`<option value="${o}">`).join('')}</datalist>`;
       break;
     case 'toggle':
@@ -1150,19 +1286,19 @@ function fieldHTML(f, uid){
                  </div>`;
       break;
     case 'textarea':
-      control = `<textarea id="${uid}" placeholder="${f.placeholder||''}"></textarea>`;
+      control = `<textarea id="${uid}" placeholder="${f.placeholder||''}">${val}</textarea>`;
       break;
     case 'number':
-      control = `<input type="number" id="${uid}" placeholder="${f.placeholder||''}">`;
+      control = `<input type="number" id="${uid}" value="${val}" placeholder="${f.placeholder||''}">`;
       break;
     case 'date':
-      control = `<input type="date" id="${uid}">`;
+      control = `<input type="date" id="${uid}" value="${val}">`;
       break;
     case 'tel':
-      control = `<input type="tel" id="${uid}" placeholder="${f.placeholder||''}">`;
+      control = `<input type="tel" id="${uid}" value="${val}" placeholder="${f.placeholder||''}">`;
       break;
     default:
-      control = `<input type="text" id="${uid}" placeholder="${f.placeholder||''}">`;
+      control = `<input type="text" id="${uid}" value="${val}" placeholder="${f.placeholder||''}">`;
   }
   return `<div class="field${span}">${label}${control}</div>`;
 }
@@ -1232,15 +1368,53 @@ function filterChips(input){
   });
 }
 
+let currentView = 'wizard';
+let currentClientName = 'Rivertown School District';
+
+const IMPLEMENTATIONS = [
+  {name:'Rivertown School District', goLive:'Oct 1, 2026', progress:62, status:'at-risk', statusLabel:'At Risk', owner:'Marcus Bell'},
+  {name:'Ashford County Government', goLive:'Jan 1, 2027', progress:15, status:'on-track', statusLabel:'On Track', owner:'Priya Natarajan'},
+  {name:'Whirley Industries', goLive:'Jul 1, 2026', progress:100, status:'complete', statusLabel:'Complete', owner:'Dana Whitfield'},
+  {name:'Toms River Municipal Utilities', goLive:'Sep 1, 2026', progress:40, status:'delayed', statusLabel:'Delayed', owner:'Marcus Bell'},
+  {name:'Heartland Logistics (Teamsters Local 830)', goLive:'Nov 1, 2026', progress:78, status:'on-track', statusLabel:'On Track', owner:'Priya Natarajan'},
+  {name:'SupplyRx Retiree Trust', goLive:'Jan 1, 2027', progress:5, status:'on-track', statusLabel:'On Track', owner:'Dana Whitfield'},
+];
+
+const CHANGE_LOG = [
+  {ts:'Jul 6, 2026 · 3:42 PM', step:'Limits & Programs', field:'Mandatory Mail Program', from:'No', to:'Yes', by:'Marcus Bell'},
+  {ts:'Jul 6, 2026 · 2:15 PM', step:'Plans', field:'Dependent Age Limit', from:'25', to:'26', by:'Marcus Bell'},
+  {ts:'Jul 5, 2026 · 11:03 AM', step:'Client & TPA Setup', field:'TPA / Broker Name', from:'Kissler & Associates', to:'Tiffany Benefits', by:'Priya Natarajan'},
+  {ts:'Jul 5, 2026 · 10:47 AM', step:'Client & TPA Setup', field:'TPA End Date', from:'—', to:'6/30/2026', by:'Priya Natarajan'},
+  {ts:'Jul 3, 2026 · 4:20 PM', step:'Copays', field:'Flat Copay ($) — Retail Generic', from:'$10', to:'$12', by:'Dana Whitfield'},
+  {ts:'Jul 2, 2026 · 9:58 AM', step:'Accumulators', field:'MOOP Single Limit', from:'$4,000', to:'$4,500', by:'Dana Whitfield'},
+  {ts:'Jun 30, 2026 · 1:30 PM', step:'Contacts & Billing', field:'Billing Cycle Type', from:'Monthly', to:'Bi-Monthly', by:'Marcus Bell'},
+  {ts:'Jun 29, 2026 · 3:05 PM', step:'Formulary & Utilization', field:'Formulary', from:'Value Formulary', to:'Standard Formulary', by:'Priya Natarajan'},
+];
+
+const VALIDATION_ITEMS = [
+  {status:'pass', text:'All required Client &amp; Plan fields are complete'},
+  {status:'pass', text:'TIN format matches PBF\u2019s expected pattern'},
+  {status:'pass', text:'No duplicate Group IDs found'},
+  {status:'pass', text:'Effective dates are sequential across Plans → Groups → TPA'},
+  {status:'warn', text:'2 Copay Rules are missing a Network Group — PBF will apply the client default network'},
+  {status:'fail', text:'Plan \u201cHDHP Plan\u201d is missing a Dispense-As-Written option, which PBF requires before load'},
+];
+
 function renderStep(stepId){
   const step = STEPS.find(s=>s.id===stepId);
   currentStep = stepId;
+  currentView = 'wizard';
 
+  document.getElementById('breadcrumbBar').innerHTML = breadcrumbWizard(step.title);
   document.getElementById('stepHeading').textContent = step.title;
-  document.getElementById('crumbStep').textContent = step.title;
   document.getElementById('stepNumLabel').textContent = step.id;
+  document.getElementById('stepSub').innerHTML = `Step <span id="stepNumLabel">${step.id}</span> of 10`;
+  document.getElementById('progressWrap').style.display = 'flex';
   document.getElementById('progressFill').style.width = (step.id/10*100)+'%';
   document.getElementById('progressPct').textContent = Math.round(step.id/10*100)+'%';
+  document.getElementById('validateBtn').style.display = 'inline-flex';
+  document.getElementById('footerNav').style.display = 'flex';
+  document.getElementById('aiFabBtn').style.display = 'flex';
 
   const groupsHTML = step.groups.map((g,gi)=>{
     if(g.info) return renderInfoGroup(g);
@@ -1262,20 +1436,156 @@ function renderStep(stepId){
   document.getElementById('backBtn').style.opacity = step.id===1 ? .4 : 1;
   document.getElementById('nextBtn').textContent = step.id===10 ? 'Save & finish' : 'Save & continue →';
 
+  updateRailActive();
   renderSidebar();
   window.scrollTo(0,0);
 }
 
+function breadcrumbWizard(title){
+  return `<a href="#" onclick="switchView('dashboard');return false;">Clients</a><span class="sep">/</span>
+          <a href="#" onclick="switchView('wizard');return false;">${currentClientName}</a><span class="sep">/</span>
+          <span class="current">${title}</span>`;
+}
+function breadcrumbHistory(){
+  return `<a href="#" onclick="switchView('dashboard');return false;">Clients</a><span class="sep">/</span>
+          <a href="#" onclick="switchView('wizard');return false;">${currentClientName}</a><span class="sep">/</span>
+          <span class="current">Change History</span>`;
+}
+
+function switchView(view){
+  if(view==='wizard'){ renderStep(currentStep); return; }
+  if(view==='history') renderHistoryView();
+  else if(view==='dashboard') renderDashboardView();
+}
+
+function hideWizardChrome(){
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('validateBtn').style.display = 'none';
+  document.getElementById('footerNav').style.display = 'none';
+  document.getElementById('aiFabBtn').style.display = 'none';
+}
+
+function renderHistoryView(){
+  currentView = 'history';
+  document.getElementById('breadcrumbBar').innerHTML = breadcrumbHistory();
+  document.getElementById('stepHeading').textContent = 'Change History';
+  document.getElementById('stepSub').innerHTML = 'Every edit made during setup, captured automatically.';
+  hideWizardChrome();
+  document.getElementById('content').innerHTML = `
+    <div class="dash-note"><strong>${CHANGE_LOG.length} changes tracked</strong>&nbsp;since setup began — captured automatically, replacing manual version-tracking across spreadsheet copies.</div>
+    <table class="hist-table">
+      <thead><tr><th>When</th><th>Step</th><th>Field</th><th>Change</th><th>Changed By</th></tr></thead>
+      <tbody>
+        ${CHANGE_LOG.map(c=>`<tr>
+          <td class="hist-ts">${c.ts}</td>
+          <td><span class="hist-step">${c.step}</span></td>
+          <td>${c.field}</td>
+          <td><span class="hist-from">${c.from}</span> → <span class="hist-to">${c.to}</span></td>
+          <td class="hist-by">${c.by}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+  updateRailActive();
+  renderSidebar();
+  window.scrollTo(0,0);
+}
+
+function renderDashboardView(){
+  currentView = 'dashboard';
+  document.getElementById('breadcrumbBar').innerHTML = `<span class="current">Implementations Overview</span>`;
+  document.getElementById('stepHeading').textContent = 'Implementations Overview';
+  document.getElementById('stepSub').textContent = 'A live view across all active client implementations.';
+  hideWizardChrome();
+
+  const onTrack = IMPLEMENTATIONS.filter(i=>i.status==='on-track').length;
+  const atRisk = IMPLEMENTATIONS.filter(i=>i.status==='at-risk').length;
+  const delayed = IMPLEMENTATIONS.filter(i=>i.status==='delayed').length;
+
+  document.getElementById('content').innerHTML = `
+    <div class="dash-note">Status below is computed automatically from step completion — no manual color-coding required. <em>Illustrative data for this walkthrough.</em></div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="num">${IMPLEMENTATIONS.length}</div><div class="lbl">Active Implementations</div></div>
+      <div class="stat-card accent-green"><div class="num">${onTrack}</div><div class="lbl">On Track</div></div>
+      <div class="stat-card accent-amber"><div class="num">${atRisk}</div><div class="lbl">At Risk</div></div>
+      <div class="stat-card accent-danger"><div class="num">${delayed}</div><div class="lbl">Delayed</div></div>
+    </div>
+    <table class="impl-table">
+      <thead><tr><th>Client</th><th>Go-Live</th><th>Progress</th><th>Status</th><th>Owner</th></tr></thead>
+      <tbody>
+        ${IMPLEMENTATIONS.map(i=>`<tr class="impl-row" onclick="openClient('${i.name.replace(/'/g,"\\'")}')">
+          <td class="impl-name">${i.name}</td>
+          <td>${i.goLive}</td>
+          <td><div class="mini-progress"><div class="mini-progress-fill" style="width:${i.progress}%"></div></div></td>
+          <td><span class="status-pill ${i.status}">${i.statusLabel}</span></td>
+          <td class="impl-owner">${i.owner}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+  updateRailActive();
+  renderSidebar();
+  window.scrollTo(0,0);
+}
+
+function openClient(name){
+  currentClientName = name;
+  currentStep = 1;
+  completedSteps.clear();
+  switchView('wizard');
+}
+
+function updateRailActive(){
+  document.getElementById('railHome').classList.toggle('active', currentView==='dashboard');
+  document.getElementById('railImpl').classList.toggle('active', currentView!=='dashboard');
+}
+
 function renderSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  if(currentView==='dashboard'){
+    sidebar.innerHTML = `
+      <div class="client-chip">
+        <div class="label">Overview</div>
+        <div class="name">All Implementations</div>
+        <div class="meta">${IMPLEMENTATIONS.length} active &nbsp;·&nbsp; Illustrative data</div>
+      </div>
+      <div class="nav-label">Filter</div>
+      <ul class="steps">
+        <li><button class="step-btn active"><span class="step-info"><span class="step-title">All</span></span></button></li>
+        <li><button class="step-btn"><span class="step-info"><span class="step-title">On Track</span></span></button></li>
+        <li><button class="step-btn"><span class="step-info"><span class="step-title">At Risk</span></span></button></li>
+        <li><button class="step-btn"><span class="step-info"><span class="step-title">Delayed</span></span></button></li>
+        <li><button class="step-btn"><span class="step-info"><span class="step-title">Complete</span></span></button></li>
+      </ul>
+      <div class="sidebar-foot">Filters are illustrative in this preview</div>
+    `;
+    return;
+  }
+
+  sidebar.innerHTML = `
+    <div class="client-chip">
+      <div class="label">Client</div>
+      <div class="name">${currentClientName}</div>
+      <div class="meta">Go-live: Oct 1, 2026 &nbsp;·&nbsp; Draft</div>
+    </div>
+    <div class="view-tabs">
+      <button class="view-tab ${currentView==='wizard'?'active':''}" onclick="switchView('wizard')">Setup</button>
+      <button class="view-tab ${currentView==='history'?'active':''}" onclick="switchView('history')">Change History</button>
+    </div>
+    <div class="nav-label">Setup Steps</div>
+    <ul class="steps" id="stepList"></ul>
+    <div class="sidebar-foot">Steps 1–10 shown &nbsp;·&nbsp; Preliminary build</div>
+  `;
+
   const list = document.getElementById('stepList');
   list.innerHTML = STEPS.map(s=>{
-    const isActive = s.id===currentStep;
+    const isActive = s.id===currentStep && currentView==='wizard';
     const isComplete = completedSteps.has(s.id);
     let statusClass = 'status-notstarted', statusText='Not started';
     if(isComplete){statusClass='status-complete'; statusText='Complete';}
     else if(isActive){statusClass='status-inprogress'; statusText='In progress';}
     return `<li>
-      <button class="step-btn ${isActive?'active':''} ${isComplete?'complete':''}" onclick="renderStep(${s.id})">
+      <button class="step-btn ${isActive?'active':''} ${isComplete?'complete':''}" onclick="switchView('wizard'); renderStep(${s.id})">
         <span class="step-dot" style="background:${stepColor(s.id)}">
           <span class="num">${s.id}</span>
           <span class="check">✓</span>
@@ -1287,6 +1597,19 @@ function renderSidebar(){
     </li>`;
   }).join('');
 }
+
+function openValidate(){
+  const passCount = VALIDATION_ITEMS.filter(v=>v.status==='pass').length;
+  const warnCount = VALIDATION_ITEMS.filter(v=>v.status==='warn').length;
+  const failCount = VALIDATION_ITEMS.filter(v=>v.status==='fail').length;
+  document.getElementById('valSummary').textContent = `${passCount} passed · ${warnCount} warning · ${failCount} needs attention before sending to PBF`;
+  document.getElementById('valList').innerHTML = VALIDATION_ITEMS.map(v=>{
+    const icon = v.status==='pass' ? '✓' : v.status==='warn' ? '!' : '✕';
+    return `<li class="val-item"><span class="val-ico ${v.status}">${icon}</span><span>${v.text}</span></li>`;
+  }).join('');
+  document.getElementById('valOverlay').classList.remove('hidden');
+}
+function closeValidate(){ document.getElementById('valOverlay').classList.add('hidden'); }
 
 function stepColor(id){
   const ramp = ['#00853E','#007F46','#00794D','#007255','#006C5D','#006664','#00606C','#005974','#00537B','#004D83'];
