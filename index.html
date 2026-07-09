@@ -244,6 +244,9 @@
     padding:32px 40px 100px;
     max-width:980px;
   }
+  .content.content-wide{
+    max-width:1280px;
+  }
   .step-head{margin-bottom:26px;}
   .step-head .eyebrow{
     font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal-blue);
@@ -520,7 +523,7 @@
 
   /* ===== Q&A Chat panel (docked, not an overlay) ===== */
   .chat-toggle{
-    position:fixed;right:32px;bottom:32px;z-index:80;
+    position:fixed;right:32px;bottom:88px;z-index:80;
     width:56px;height:56px;border-radius:50%;
     background:linear-gradient(135deg, var(--teal-blue), var(--green));
     border:none;cursor:pointer;
@@ -538,8 +541,8 @@
   .chat-toggle:hover .chat-toggle-label{display:block;}
 
   .chat-panel{
-    position:fixed;right:32px;bottom:100px;z-index:81;
-    width:360px;max-height:min(560px, calc(100vh - 140px));
+    position:fixed;right:32px;bottom:156px;z-index:81;
+    width:360px;max-height:min(560px, calc(100vh - 196px));
     background:var(--paper);border-radius:20px;
     box-shadow:0 24px 60px rgba(0,20,30,.25);
     display:flex;flex-direction:column;overflow:hidden;
@@ -652,10 +655,11 @@
   }
   .risk-reason{display:flex;align-items:flex-start;gap:5px;margin-top:5px;font-size:11.5px;color:var(--ink-soft);line-height:1.4;max-width:260px;}
   .risk-reason .why{
-    flex-shrink:0;margin-top:1px;width:14px;height:14px;border-radius:50%;
-    background:var(--surface-2);color:var(--ink-faint);font-size:9px;font-weight:700;
+    flex-shrink:0;margin-top:1px;width:16px;height:16px;border-radius:50%;
+    background:linear-gradient(135deg, var(--teal-blue), var(--green));color:#fff;
     display:inline-flex;align-items:center;justify-content:center;cursor:help;position:relative;
   }
+  .risk-reason .why svg{width:9px;height:9px;}
   .risk-reason .why .tip{
     display:none;position:absolute;top:20px;left:0;
     background:var(--ink);color:#fff;font-size:11px;font-weight:400;
@@ -855,8 +859,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
       </div>
       <div class="chat-head-text">
-        <strong>Setup Q&amp;A</strong>
-        <span>Ask about any field on this step</span>
+        <strong id="chatHeadTitle">Setup Q&amp;A</strong>
+        <span id="chatHeadSub">Ask about any field on this step</span>
       </div>
       <button class="chat-close" onclick="closeChat()" title="Close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -1504,6 +1508,15 @@ const IMPLEMENTATIONS = [
   {name:'Toms River Municipal Utilities', goLive:'Sep 1, 2026', goLiveInDays:55, owner:'Marcus Bell', totalSteps:10, stepsCompleted:4, validationFails:0, validationWarns:1, lastActivityDaysAgo:16},
   {name:'Heartland Logistics (Teamsters Local 830)', goLive:'Nov 1, 2026', goLiveInDays:116, owner:'Priya Natarajan', totalSteps:10, stepsCompleted:8, validationFails:0, validationWarns:0, lastActivityDaysAgo:4},
   {name:'SupplyRx Retiree Trust', goLive:'Jan 1, 2027', goLiveInDays:177, owner:'Dana Whitfield', totalSteps:10, stepsCompleted:0, validationFails:0, validationWarns:0, lastActivityDaysAgo:1},
+  {name:'Lakeside Regional Health Network', goLive:'Aug 1, 2026', goLiveInDays:24, owner:'Dana Whitfield', totalSteps:10, stepsCompleted:9, validationFails:0, validationWarns:0, lastActivityDaysAgo:1},
+  {name:'Copper Valley Mining Co.', goLive:'Dec 1, 2026', goLiveInDays:146, owner:'Marcus Bell', totalSteps:10, stepsCompleted:3, validationFails:2, validationWarns:1, lastActivityDaysAgo:5},
+  {name:'Northshore Public Schools', goLive:'Oct 15, 2026', goLiveInDays:99, owner:'Priya Natarajan', totalSteps:10, stepsCompleted:5, validationFails:0, validationWarns:3, lastActivityDaysAgo:3},
+  {name:'Vantage Freight & Logistics', goLive:'Aug 15, 2026', goLiveInDays:38, owner:'Alicia Ferreira', totalSteps:10, stepsCompleted:2, validationFails:0, validationWarns:0, lastActivityDaysAgo:3},
+  {name:'Willowbrook Retirement Communities', goLive:'Feb 1, 2027', goLiveInDays:208, owner:'Tom Okafor', totalSteps:10, stepsCompleted:0, validationFails:0, validationWarns:0, lastActivityDaysAgo:0},
+  {name:'Cascade County Water Authority', goLive:'Jul 1, 2026', goLiveInDays:-7, owner:'Marcus Bell', totalSteps:10, stepsCompleted:7, validationFails:1, validationWarns:0, lastActivityDaysAgo:4},
+  {name:'Union Local 220 Benefits Trust', goLive:'Nov 15, 2026', goLiveInDays:130, owner:'Priya Natarajan', totalSteps:10, stepsCompleted:10, validationFails:1, validationWarns:0, lastActivityDaysAgo:2},
+  {name:'Fairview Independent School District', goLive:'Sep 15, 2026', goLiveInDays:69, owner:'Dana Whitfield', totalSteps:10, stepsCompleted:6, validationFails:0, validationWarns:0, lastActivityDaysAgo:8},
+  {name:'Redwood Transit Authority', goLive:'Dec 15, 2026', goLiveInDays:160, owner:'Alicia Ferreira', totalSteps:10, stepsCompleted:4, validationFails:0, validationWarns:0, lastActivityDaysAgo:2},
 ];
 
 /* ============================================================
@@ -1594,7 +1607,7 @@ function renderStep(stepId){
   document.getElementById('progressPct').textContent = Math.round(step.id/10*100)+'%';
   document.getElementById('validateBtn').style.display = 'inline-flex';
   document.getElementById('footerNav').style.display = 'flex';
-  document.getElementById('chatToggleBtn').style.display = 'flex';
+  showChat('wizard');
 
   const groupsHTML = step.groups.map((g,gi)=>{
     if(g.info) return renderInfoGroup(g);
@@ -1661,6 +1674,7 @@ function renderComingSoon(){
   document.getElementById('stepHeading').textContent = comingSoonLabel;
   document.getElementById('stepSub').textContent = 'Not part of this preview build.';
   hideWizardChrome();
+  hideChat();
   document.getElementById('content').innerHTML = `
     <div class="empty-state">
       <div class="es-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.2a2.5 2.5 0 014.9.8c0 1.7-2.4 2-2.4 3.5"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg></div>
@@ -1678,8 +1692,15 @@ function hideWizardChrome(){
   document.getElementById('progressWrap').style.display = 'none';
   document.getElementById('validateBtn').style.display = 'none';
   document.getElementById('footerNav').style.display = 'none';
+}
+
+function hideChat(){
   document.getElementById('chatToggleBtn').style.display = 'none';
   closeChat();
+}
+function showChat(context){
+  chatContext = context;
+  document.getElementById('chatToggleBtn').style.display = 'flex';
 }
 
 function renderHistoryView(){
@@ -1688,6 +1709,7 @@ function renderHistoryView(){
   document.getElementById('stepHeading').textContent = 'Change History';
   document.getElementById('stepSub').innerHTML = 'Every edit made during setup, captured automatically.';
   hideWizardChrome();
+  hideChat();
   document.getElementById('content').innerHTML = `
     <div class="dash-note"><strong>${CHANGE_LOG.length} changes tracked</strong>&nbsp;since setup began — captured automatically, replacing manual version-tracking across spreadsheet copies.</div>
     <table class="hist-table">
@@ -1720,6 +1742,7 @@ function renderDashboardView(){
   document.getElementById('stepHeading').textContent = 'Implementation Scorecard';
   document.getElementById('stepSub').textContent = 'A live risk view across all active client implementations.';
   hideWizardChrome();
+  showChat('dashboard');
 
   const rows = IMPLEMENTATIONS.map(i=>({...i, risk: assessImplementationRisk(i), progress: Math.round(i.stepsCompleted/i.totalSteps*100)}));
   const onTrack = rows.filter(r=>r.risk.status==='on-track').length;
@@ -1751,7 +1774,7 @@ function renderDashboardView(){
             <span class="status-pill ${r.risk.status}">${r.risk.statusLabel}</span>
             <div class="risk-reason">
               <span>${r.risk.reason}</span>
-              <span class="why">?<span class="tip">${r.risk.signals}</span></span>
+              <span class="why"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/></svg><span class="tip">${r.risk.signals}</span></span>
             </div>
           </td>
           <td class="impl-owner">${r.owner}</td>
@@ -1779,6 +1802,7 @@ function updateNavActive(){
   document.getElementById('railReports').classList.toggle('active', key==='reports');
   document.getElementById('railSettings').classList.toggle('active', key==='settings');
   document.querySelectorAll('#headerNav a').forEach(a=>a.classList.toggle('active', a.dataset.nav===key));
+  document.getElementById('content').classList.toggle('content-wide', currentView==='dashboard');
 }
 
 function renderSidebar(){
@@ -2071,7 +2095,62 @@ const QA_LIBRARY = [
 ];
 const QA_FALLBACK = `I don't have a canned answer for that in this preview build. Try asking about DAW options, ERISA, ending a TPA relationship, GPI look-back levels, MOOP vs. Maximum Paid By Plan, or Mandatory Mail.`;
 
-let chatStarted = false;
+const DASHBOARD_SUGGESTIONS = [
+  "Which implementations need attention right now?",
+  "Why is Rivertown School District at risk?",
+  "How many implementations are on track vs. at risk?",
+];
+const SCORECARD_FALLBACK = `I can answer questions about a specific client's status (try a client name), which implementations need attention, or the on-track/at-risk/delayed breakdown across the portfolio.`;
+
+function getScoredRows(){
+  return IMPLEMENTATIONS.map(i=>({...i, risk: assessImplementationRisk(i)}));
+}
+
+function scorecardAnswer(text){
+  const lower = text.toLowerCase();
+  const rows = getScoredRows();
+
+  const nameMatch = rows.find(r => lower.includes(r.name.split(' ').slice(0,2).join(' ').toLowerCase()));
+  if(nameMatch){
+    return `<strong>${nameMatch.name}</strong> is currently <strong>${nameMatch.risk.statusLabel}</strong>: ${nameMatch.risk.reason}`;
+  }
+
+  if(/how many|breakdown|count|overview|summary|on track vs/.test(lower)){
+    const c = {};
+    rows.forEach(r=>{ c[r.risk.status] = (c[r.risk.status]||0) + 1; });
+    return `Out of ${rows.length} active implementations: <strong>${c['on-track']||0}</strong> On Track, <strong>${c['at-risk']||0}</strong> At Risk, <strong>${c['delayed']||0}</strong> Delayed, <strong>${c['complete']||0}</strong> Complete.`;
+  }
+
+  if(/attention|priority|worst|worry|focus|behind|need.*look|at risk|delayed/.test(lower)){
+    const flagged = rows.filter(r=>r.risk.status==='at-risk'||r.risk.status==='delayed');
+    if(!flagged.length) return `Nothing needs urgent attention right now — every implementation is On Track or Complete.`;
+    const list = flagged.map(r=>`• <strong>${r.name}</strong> (${r.risk.statusLabel}) — ${r.risk.reason}`).join('<br>');
+    return `${flagged.length} implementation(s) need a look:<br>${list}`;
+  }
+
+  if(/what does .*mean|status mean|define/.test(lower)){
+    return `Statuses come from the Portfolio Risk Agent, not a manual flag: <strong>On Track</strong> — on pace, no open failures. <strong>At Risk</strong> — a validation failure, warnings, or tightening pace needs a look. <strong>Delayed</strong> — stalled activity, behind pace, or past go-live with steps still open. <strong>Complete</strong> — all steps done with a clean validation pass.`;
+  }
+
+  return SCORECARD_FALLBACK;
+}
+
+function matchAnswer(text){
+  const lower = text.toLowerCase();
+  let best = null, bestScore = 0;
+  QA_LIBRARY.forEach(q=>{
+    const score = q.keywords.filter(k=>lower.includes(k)).length;
+    if(score > bestScore){ bestScore = score; best = q; }
+  });
+  return best ? best.answer : QA_FALLBACK;
+}
+
+function getAnswer(text){
+  return chatContext === 'dashboard' ? scorecardAnswer(text) : matchAnswer(text);
+}
+
+let chatContext = 'wizard';
+let chatContextStarted = null;
 
 function toggleChat(){
   const panel = document.getElementById('chatPanel');
@@ -2080,7 +2159,7 @@ function toggleChat(){
 }
 function openChat(){
   document.getElementById('chatPanel').classList.remove('hidden');
-  if(!chatStarted) startChat();
+  if(chatContextStarted !== chatContext) startChat();
   document.getElementById('chatInput').focus();
 }
 function closeChat(){
@@ -2088,15 +2167,25 @@ function closeChat(){
 }
 
 function startChat(){
-  chatStarted = true;
+  chatContextStarted = chatContext;
+  const isDashboard = chatContext === 'dashboard';
+  document.getElementById('chatHeadTitle').textContent = isDashboard ? 'Scorecard Q&A' : 'Setup Q&A';
+  document.getElementById('chatHeadSub').textContent = isDashboard ? 'Ask about client statuses' : 'Ask about any field on this step';
+
   const body = document.getElementById('chatBody');
-  body.innerHTML = `<div class="chat-intro">Ask about any field, option, or workflow on this setup — try one below or type your own.</div>`;
-  appendChatMessage('agent', `Hi, I'm the Setup Q&amp;A assistant. I can explain jargon, field options, or how a step's data is used — grounded in this client's actual setup, not generic definitions.`);
+  body.innerHTML = `<div class="chat-intro">${isDashboard
+    ? 'Ask about portfolio risk, a specific client\'s status, or the breakdown across the scorecard.'
+    : 'Ask about any field, option, or workflow on this setup — try one below or type your own.'}</div>`;
+  appendChatMessage('agent', isDashboard
+    ? `Hi, I'm the Scorecard Q&amp;A assistant. I read the current risk data across all ${IMPLEMENTATIONS.length} implementations — ask me about any client or the portfolio as a whole.`
+    : `Hi, I'm the Setup Q&amp;A assistant. I can explain jargon, field options, or how a step's data is used — grounded in this client's actual setup, not generic definitions.`);
+
+  const prompts = isDashboard ? DASHBOARD_SUGGESTIONS : QA_LIBRARY.slice(0,3).map(q=>q.prompt);
   const suggestions = document.createElement('div');
   suggestions.className = 'chat-suggestions';
   suggestions.id = 'chatSuggestions';
-  suggestions.innerHTML = QA_LIBRARY.slice(0,3).map(q=>
-    `<button class="chat-suggestion" onclick="askSuggestion('${q.id}')">${q.prompt}</button>`
+  suggestions.innerHTML = prompts.map(p=>
+    `<button class="chat-suggestion" onclick="askSuggestion('${p.replace(/'/g,"\\'")}')">${p}</button>`
   ).join('');
   body.appendChild(suggestions);
   body.scrollTop = body.scrollHeight;
@@ -2111,23 +2200,11 @@ function appendChatMessage(role, html){
   body.scrollTop = body.scrollHeight;
 }
 
-function askSuggestion(id){
+function askSuggestion(promptText){
   const existing = document.getElementById('chatSuggestions');
   if(existing) existing.remove();
-  const q = QA_LIBRARY.find(x=>x.id===id);
-  if(!q) return;
-  appendChatMessage('user', q.prompt);
-  setTimeout(()=>appendChatMessage('agent', q.answer), 350);
-}
-
-function matchAnswer(text){
-  const lower = text.toLowerCase();
-  let best = null, bestScore = 0;
-  QA_LIBRARY.forEach(q=>{
-    const score = q.keywords.filter(k=>lower.includes(k)).length;
-    if(score > bestScore){ bestScore = score; best = q; }
-  });
-  return best ? best.answer : QA_FALLBACK;
+  appendChatMessage('user', promptText);
+  setTimeout(()=>appendChatMessage('agent', getAnswer(promptText)), 350);
 }
 
 function sendChatMessage(){
@@ -2138,7 +2215,7 @@ function sendChatMessage(){
   if(existing) existing.remove();
   appendChatMessage('user', text.replace(/</g,'&lt;'));
   input.value = '';
-  const answer = matchAnswer(text);
+  const answer = getAnswer(text);
   setTimeout(()=>appendChatMessage('agent', answer), 400);
 }
 
