@@ -715,6 +715,63 @@
   }
   .val-btn:hover{background:#00722F;}
 
+  /* ===== Plan Document Extraction ===== */
+  .extract-overlay{
+    position:fixed;inset:0;z-index:210;background:rgba(3,20,35,.55);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;padding:24px;animation:onboardFadeIn .25s ease;
+  }
+  .extract-overlay.hidden{display:none;}
+  .extract-card{
+    background:var(--paper);border-radius:26px;width:100%;max-width:640px;max-height:86vh;overflow-y:auto;
+    box-shadow:0 30px 80px rgba(0,20,30,.35);padding:34px 36px 30px;
+    animation:onboardPop .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .extract-badge{
+    width:48px;height:48px;border-radius:15px;margin-bottom:16px;
+    background:linear-gradient(135deg, var(--teal-blue), var(--green));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 24px -8px rgba(0,77,131,.4);
+  }
+  .extract-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-blue);margin-bottom:6px;}
+  .extract-title{font-family:var(--font-display);font-size:20px;font-weight:600;margin:0 0 10px;word-break:break-word;}
+  .extract-body{font-size:13.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 22px;}
+  .extract-drop{
+    display:block;border:1.5px dashed var(--border-strong);border-radius:var(--radius-md);
+    padding:32px 20px;text-align:center;margin-bottom:20px;cursor:pointer;
+  }
+  .extract-drop:hover{border-color:var(--teal-blue);background:var(--surface);}
+  .extract-drop input{display:none;}
+  .extract-drop .dz-ico{
+    width:38px;height:38px;border-radius:12px;margin:0 auto 12px;
+    background:var(--surface-2);color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .extract-drop .dz-title{font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+  .extract-drop .dz-sub{font-size:12px;color:var(--ink-faint);}
+  .extract-progress-track{height:8px;border-radius:20px;background:var(--surface-2);overflow:hidden;margin-bottom:10px;}
+  .extract-progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg, var(--green), var(--teal-blue));width:0%;transition:width 1.5s ease;}
+  .extract-status-line{font-size:12.5px;color:var(--ink-soft);}
+  .extract-summary{
+    display:flex;align-items:center;gap:10px;background:var(--surface);
+    border:1px dashed var(--border-strong);border-radius:var(--radius-md);
+    padding:12px 14px;font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;
+  }
+  .extract-group-label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);margin:18px 0 8px;}
+  .extract-row{display:flex;align-items:flex-start;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border);}
+  .extract-row:last-child{border-bottom:none;}
+  .extract-row input[type=checkbox]{margin-top:3px;width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer;}
+  .extract-row .er-body{flex:1;min-width:0;}
+  .extract-row .er-label{font-size:12.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .extract-row .er-value{font-size:13px;color:var(--ink);margin-top:3px;}
+  .extract-row .er-source{font-size:11px;color:var(--ink-faint);margin-top:3px;}
+  .confidence-badge{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.02em;white-space:nowrap;}
+  .confidence-badge.high{background:#E4F3EA;color:var(--green);}
+  .confidence-badge.medium{background:var(--amber-bg);color:var(--amber);}
+  .confidence-badge.low{background:var(--danger-bg);color:var(--danger);}
+  .extract-not-found{font-size:12px;color:var(--ink-faint);font-style:italic;margin-top:12px;}
+  .extract-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .extract-footer .ef-count{font-size:12.5px;color:var(--ink-soft);}
+
   @media (max-width:900px){
     .stat-row{grid-template-columns:1fr 1fr;}
   }
@@ -788,6 +845,11 @@
       <div class="val-foot-note">Preview only — these checks mirror what PBF's loader validates, shown here so issues surface before load, not after.</div>
       <button class="val-btn" onclick="closeValidate()">Got it</button>
     </div>
+  </div>
+
+  <!-- ================= PLAN DOCUMENT EXTRACTION OVERLAY ================= -->
+  <div class="extract-overlay hidden" id="extractOverlay">
+    <div class="extract-card" id="extractCard"></div>
   </div>
 
   <!-- ================= GLOBAL HEADER ================= -->
@@ -1043,7 +1105,7 @@ const STEPS = [
   ]
 },
 {
-  id:3, title:"Plans", sub:"Tab 3 · Plans",
+  id:3, title:"Plans", sub:"Tab 3 · Plans", docExtract:true,
   eyebrow:"Plan Design",
   intro:"Define every plan this client offers. Everything from Groups onward will reference the plans you set up here — a client can have more than one.",
   groups:[
@@ -1174,7 +1236,7 @@ const STEPS = [
   ]
 },
 {
-  id:8, title:"Formulary & Utilization", sub:"Tab 8 · Frmly-Step-PA-Qty-HC Reform",
+  id:8, title:"Formulary & Utilization", sub:"Tab 8 · Frmly-Step-PA-Qty-HC Reform", docExtract:true,
   eyebrow:"Utilization Management",
   intro:"Which drug list this client follows, when a prior authorization or step therapy is required, and healthcare-reform status flags.",
   groups:[
@@ -1213,7 +1275,7 @@ const STEPS = [
   ]
 },
 {
-  id:9, title:"Accumulators", sub:"Tab 9 · Accums-Maximizer",
+  id:9, title:"Accumulators", sub:"Tab 9 · Accums-Maximizer", docExtract:true,
   eyebrow:"Deductibles & Out-of-Pocket",
   intro:"Deductibles, out-of-pocket maximums, and any copay assistance / maximizer programs.",
   groups:[
@@ -1248,7 +1310,7 @@ const STEPS = [
   ]
 },
 {
-  id:10, title:"Copays", sub:"Tab 10 · Copays_1",
+  id:10, title:"Copays", sub:"Tab 10 · Copays_1", docExtract:true,
   eyebrow:"Member Cost Share",
   intro:"What members pay at the register — flat copays, percentage coinsurance, or a mix — by drug type and category.",
   groups:[
@@ -1502,6 +1564,7 @@ function renderStep(stepId){
       <h2>${step.title}</h2>
       <p>${step.intro}</p>
     </div>
+    ${step.docExtract ? renderExtractBanner(step.id) : ''}
     ${groupsHTML}
   `;
 
@@ -1849,6 +1912,284 @@ function applyAIFill(){
   banner.innerHTML = `
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/></svg></span>
     <span class="txt"><strong>AI found matches for 3 fields</strong> on this step from public records — review the values before saving.</span>
+    <button class="close" onclick="this.closest('.ai-banner').remove()">✕</button>
+  `;
+  content.insertBefore(banner, content.firstChild);
+}
+
+/* ============================================================
+   PLAN DOCUMENT EXTRACTION AGENT
+   Mocked extraction — no real parsing or API calls. Values below
+   stand in for what an LLM would draft from a signed Summary Plan
+   Description / master group agreement. Field positions (gi/fi/ei)
+   are matched to the real STEPS field order so applying them
+   writes into the actual live wizard inputs.
+============================================================ */
+const EXTRACT_DOC_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>`;
+
+const EXTRACTION_PROFILES = {
+  3: { // Plans
+    entryCounts: {0:2},
+    fields: [
+      {gi:0, ei:0, fi:0, value:'PPO Base Plan', confidence:'High', source:'§2.1 Plan Options'},
+      {gi:0, ei:0, fi:1, value:true, confidence:'High', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:2, value:true, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:3, value:false, confidence:'Medium', source:'§4.2 Retiree Eligibility'},
+      {gi:0, ei:0, fi:4, value:'As Of End Of Birth Year', confidence:'High', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:5, value:26, confidence:'High', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:6, value:'As Of End Of Birth Year', confidence:'Medium', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:7, value:26, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:8, value:'DAW – Use Brand Copay', confidence:'High', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:0, fi:9, value:'Both', confidence:'Medium', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:0, fi:10, value:'Pharmacy Level', confidence:'Low', source:'§4.5 Direct Claims'},
+
+      {gi:0, ei:1, fi:0, value:'HDHP Plan', confidence:'High', source:'§2.1 Plan Options'},
+      {gi:0, ei:1, fi:1, value:true, confidence:'High', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:2, value:true, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:3, value:false, confidence:'Medium', source:'§4.2 Retiree Eligibility'},
+      {gi:0, ei:1, fi:4, value:'As Of End Of Birth Year', confidence:'High', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:5, value:26, confidence:'High', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:6, value:'As Of End Of Birth Year', confidence:'Medium', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:7, value:26, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:8, value:'Mandatory Generic – Use Brand Copay', confidence:'High', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:1, fi:9, value:'Both', confidence:'Medium', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:1, fi:10, value:'Pharmacy Level', confidence:'Low', source:'§4.5 Direct Claims'},
+    ]
+  },
+  8: { // Formulary & Utilization
+    entryCounts: {},
+    fields: [
+      {gi:0, fi:0, value:'Standard Formulary', confidence:'High', source:'§5.2 Covered Drug List'},
+      {gi:1, fi:0, value:'Enabled', confidence:'High', source:'§5.4 Step Therapy Requirements'},
+      {gi:1, fi:2, value:true, confidence:'Medium', source:'§5.4 Step Therapy Requirements'},
+      {gi:2, fi:0, value:'Standard PA List', confidence:'Medium', source:'§5.5 Prior Authorization'},
+      {gi:2, fi:2, value:true, confidence:'Low', source:'§5.5 Prior Authorization'},
+      {gi:3, fi:0, value:'Standard QL', confidence:'Medium', source:'§5.6 Quantity Limits'},
+      {gi:4, fi:0, value:true, confidence:'High', source:'§9.1 Plan Administration (ERISA)'},
+      {gi:4, fi:3, value:true, confidence:'Medium', source:'§9.3 Affordable Care Act Compliance'},
+      {gi:5, fi:0, value:'Standard Exclusion List', confidence:'Low', source:'§5.7 Excluded Drugs'},
+    ]
+  },
+  9: { // Accumulators
+    entryCounts: {},
+    fields: [
+      {gi:0, ei:0, fi:0, value:'ALL PLANS', confidence:'High', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:1, value:'Annual Deductible', confidence:'Medium', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:2, value:'Calendar Year', confidence:'High', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:3, value:250, confidence:'High', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:4, value:500, confidence:'High', source:'§6.1 Deductible'},
+      {gi:1, ei:0, fi:0, value:'ALL PLANS', confidence:'High', source:'§6.3 Maximum Out-of-Pocket'},
+      {gi:1, ei:0, fi:1, value:'Out-of-Pocket Maximum', confidence:'Medium', source:'§6.3 Maximum Out-of-Pocket'},
+      {gi:1, ei:0, fi:2, value:4500, confidence:'High', source:'§6.3 Maximum Out-of-Pocket'},
+      {gi:1, ei:0, fi:3, value:9000, confidence:'High', source:'§6.3 Maximum Out-of-Pocket'},
+    ]
+  },
+  10: { // Copays
+    entryCounts: {1:3},
+    fields: [
+      {gi:0, fi:1, value:'3-Tier', confidence:'High', source:'§7.1 Prescription Drug Copayments'},
+      {gi:0, fi:3, value:true, confidence:'Medium', source:'§7.1 Prescription Drug Copayments'},
+      {gi:0, fi:5, value:true, confidence:'Low', source:'§7.1 Prescription Drug Copayments'},
+
+      {gi:1, ei:0, fi:0, value:'Retail', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:1, value:'Generic', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:2, value:30, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:3, value:'Flat', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:4, value:12, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+
+      {gi:1, ei:1, fi:0, value:'Retail', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:1, value:'Brand', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:2, value:30, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:3, value:'Flat', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:4, value:45, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+
+      {gi:1, ei:2, fi:0, value:'Mail', confidence:'Medium', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:1, value:'Generic', confidence:'Medium', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:2, value:90, confidence:'Medium', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:3, value:'Flat', confidence:'Medium', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:4, value:24, confidence:'Medium', source:'§7.3 Mail Order Copayments'},
+    ]
+  }
+};
+
+let extractOverlayStep = null;
+let extractFileMeta = null;
+let extractFields = [];
+
+function getFieldMeta(stepId, gi, fi){
+  return STEPS.find(s=>s.id===stepId).groups[gi].fields[fi];
+}
+function getGroupMeta(stepId, gi){
+  return STEPS.find(s=>s.id===stepId).groups[gi];
+}
+
+function renderExtractBanner(stepId){
+  return `<div class="card" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;">
+    <div style="display:flex;gap:14px;align-items:center;">
+      <div class="extract-badge" style="margin-bottom:0;width:40px;height:40px;border-radius:12px;">${EXTRACT_DOC_ICON}</div>
+      <div>
+        <div style="font-weight:600;font-size:14px;">Have a signed Plan Document for this client?</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);">Upload it and this step's fields can be drafted automatically — you'll review every value before it's saved.</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="openExtractOverlay(${stepId})">Extract from Plan Document</button>
+  </div>`;
+}
+
+function openExtractOverlay(stepId){
+  extractOverlayStep = stepId;
+  document.getElementById('extractOverlay').classList.remove('hidden');
+  renderExtractUpload();
+}
+function closeExtractOverlay(){
+  document.getElementById('extractOverlay').classList.add('hidden');
+}
+
+function renderExtractUpload(){
+  document.getElementById('extractCard').innerHTML = `
+    <div class="extract-badge">${EXTRACT_DOC_ICON}</div>
+    <div class="extract-eyebrow">Plan Document Extraction</div>
+    <h3 class="extract-title">Upload a Plan Document</h3>
+    <p class="extract-body">Upload the client's signed Summary Plan Description or master group agreement (PDF). This step's fields will be drafted from it — nothing saves until you review and confirm each value.</p>
+    <label class="extract-drop" for="extractFileInput">
+      <input type="file" accept="application/pdf" id="extractFileInput" onchange="handleExtractFile(event)">
+      <div class="dz-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
+      <div class="dz-title">Click to choose a PDF</div>
+      <div class="dz-sub">Nothing is uploaded anywhere in this preview build</div>
+    </label>
+    <div class="extract-footer">
+      <span></span>
+      <button class="btn" onclick="closeExtractOverlay()">Cancel</button>
+    </div>
+  `;
+}
+
+function handleExtractFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  extractFileMeta = {name:file.name, sizeKb: Math.max(1, Math.round(file.size/1024))};
+  renderExtractParsing();
+  setTimeout(renderExtractReview, 1700);
+}
+
+function renderExtractParsing(){
+  document.getElementById('extractCard').innerHTML = `
+    <div class="extract-badge">${EXTRACT_DOC_ICON}</div>
+    <div class="extract-eyebrow">Plan Document Extraction</div>
+    <h3 class="extract-title">Reading ${extractFileMeta.name}…</h3>
+    <p class="extract-body">Scanning for plan design, copay, accumulator, and formulary language relevant to this step.</p>
+    <div class="extract-progress-track"><div class="extract-progress-fill" id="extractProgressFill"></div></div>
+    <div class="extract-status-line" id="extractStatusLine">Parsing document text…</div>
+  `;
+  requestAnimationFrame(()=>{
+    const fill = document.getElementById('extractProgressFill');
+    if(fill) fill.style.width = '100%';
+  });
+  ['Parsing document text…','Matching sections to setup fields…','Drafting field values…'].forEach((line,i)=>{
+    setTimeout(()=>{
+      const el = document.getElementById('extractStatusLine');
+      if(el) el.textContent = line;
+    }, i*550);
+  });
+}
+
+function renderExtractReview(){
+  const stepId = extractOverlayStep;
+  const profile = EXTRACTION_PROFILES[stepId];
+  extractFields = profile.fields.map((f,idx)=>{
+    const meta = getFieldMeta(stepId, f.gi, f.fi);
+    const group = getGroupMeta(stepId, f.gi);
+    return {...f, idx, label:meta.label, type:meta.type, groupTitle:group.title};
+  });
+
+  let rowsHtml = '';
+  let lastGroupKey = null;
+  extractFields.forEach(f=>{
+    const groupKey = `${f.gi}-${f.ei ?? ''}`;
+    if(groupKey !== lastGroupKey){
+      const entryLabel = f.ei !== undefined ? `${f.groupTitle} — Entry ${f.ei+1}` : f.groupTitle;
+      rowsHtml += `<div class="extract-group-label">${entryLabel}</div>`;
+      lastGroupKey = groupKey;
+    }
+    let displayVal = f.value;
+    if(f.type === 'toggle') displayVal = f.value ? 'Yes' : 'No';
+    else if(f.label.includes('($)')) displayVal = `$${f.value}`;
+    rowsHtml += `<div class="extract-row">
+      <input type="checkbox" id="ex-${f.idx}" checked onchange="updateExtractSelectedCount()">
+      <div class="er-body">
+        <div class="er-label">${f.label} <span class="confidence-badge ${f.confidence.toLowerCase()}">${f.confidence} confidence</span></div>
+        <div class="er-value">${displayVal}</div>
+        <div class="er-source">Source: ${extractFileMeta.name} — ${f.source}</div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('extractCard').innerHTML = `
+    <div class="extract-badge">${EXTRACT_DOC_ICON}</div>
+    <div class="extract-eyebrow">Plan Document Extraction</div>
+    <h3 class="extract-title">Review extracted values</h3>
+    <div class="extract-summary">Found ${extractFields.length} value(s) in <strong>${extractFileMeta.name}</strong> (~${extractFileMeta.sizeKb} KB) relevant to this step. Uncheck anything you don't want applied.</div>
+    ${rowsHtml}
+    <div class="extract-not-found">Fields not listed above weren't clearly stated in the document — complete those manually.</div>
+    <div class="extract-footer">
+      <span class="ef-count" id="extractSelectedCount"></span>
+      <div style="display:flex;gap:10px;">
+        <button class="btn" onclick="closeExtractOverlay()">Discard</button>
+        <button class="btn btn-primary" onclick="applyExtraction()">Apply selected</button>
+      </div>
+    </div>
+  `;
+  updateExtractSelectedCount();
+}
+
+function updateExtractSelectedCount(){
+  const el = document.getElementById('extractSelectedCount');
+  if(!el) return;
+  const checked = document.querySelectorAll('#extractCard input[type=checkbox]:checked').length;
+  el.textContent = `${checked} of ${extractFields.length} selected`;
+}
+
+function applyExtraction(){
+  const stepId = extractOverlayStep;
+  const profile = EXTRACTION_PROFILES[stepId];
+
+  Object.entries(profile.entryCounts).forEach(([gi, count])=>{
+    const key = `${stepId}-${gi}`;
+    const have = repeaterCounts[key] || 1;
+    for(let i=have; i<count; i++){ addRepeaterRow(key, stepId, Number(gi)); }
+  });
+
+  let appliedCount = 0;
+  extractFields.forEach(f=>{
+    const cb = document.getElementById(`ex-${f.idx}`);
+    if(!cb || !cb.checked) return;
+    const uid = f.ei !== undefined ? `s${stepId}g${f.gi}e${f.ei}f${f.fi}` : `s${stepId}g${f.gi}f${f.fi}`;
+    const el = document.getElementById(uid);
+    if(!el) return;
+    if(f.type === 'toggle'){
+      el.checked = !!f.value;
+      const row = el.closest('.switch-row');
+      if(row){
+        const label = row.querySelector('.switch-label');
+        label.classList.toggle('on', el.checked);
+        label.textContent = el.checked ? 'Yes' : 'No';
+      }
+    } else {
+      el.value = f.value;
+    }
+    appliedCount++;
+  });
+
+  closeExtractOverlay();
+  const content = document.getElementById('content');
+  const existing = document.getElementById('extractFillBanner');
+  if(existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.className = 'ai-banner';
+  banner.id = 'extractFillBanner';
+  banner.innerHTML = `
+    <span class="ico">${EXTRACT_DOC_ICON}</span>
+    <span class="txt"><strong>Applied ${appliedCount} value(s)</strong> extracted from ${extractFileMeta.name} — review before saving.</span>
     <button class="close" onclick="this.closest('.ai-banner').remove()">✕</button>
   `;
   content.insertBefore(banner, content.firstChild);
