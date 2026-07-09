@@ -307,6 +307,18 @@
   }
   select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%236B7280'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;}
   .field .field-hint{font-size:11px;color:var(--ink-faint);}
+  .field.has-error input, .field.has-error select, .field.has-error textarea{
+    border-color:var(--danger);background:var(--danger-bg);
+  }
+  .field.has-error input:focus, .field.has-error select:focus{
+    box-shadow:0 0 0 3px rgba(192,57,43,.14);
+  }
+  .field-error{
+    display:none;align-items:flex-start;gap:5px;
+    font-size:11.5px;color:var(--danger);line-height:1.4;
+  }
+  .field.has-error .field-error{display:flex;}
+  .field-error:before{content:"⚠";flex-shrink:0;font-size:10.5px;line-height:1.5;}
 
   /* toggle switch */
   .switch-row{display:flex;align-items:center;gap:10px;}
@@ -1062,15 +1074,15 @@ const STEPS = [
       {name:"lob", label:"Line of Business", type:"select", options:["Commercial","Government / Municipal","Taft-Hartley (Union)","Tribal","Retiree"], value:"Government / Municipal", source:"sf"},
       {name:"lobEff", label:"Line of Business Effective Date", type:"date"},
       {name:"lobEnd", label:"Line of Business End Date", type:"date"},
-      {name:"contractStart", label:"Contract Start Date", type:"date"},
-      {name:"contractEnd", label:"Contract End Date", type:"date"},
+      {name:"contractStart", label:"Contract Start Date", type:"date", validate:true, validateTarget:"s1g0f11"},
+      {name:"contractEnd", label:"Contract End Date", type:"date", validate:true},
     ]},
     {title:"Customer Details", fields:[
       {name:"customer", label:"Customer", type:"combo", options:["AVANT HEALTH","PBF","BENECARD","RDS","SUPPLYRX"], help:"Which internal book of business this client is priced and administered under.", value:"BENECARD", source:"sf"},
       {name:"clientOption", label:"Client Option", type:"combo", options:["Standard","Wellness Program","DUR Program","Retiree Surv. Deps","Retirees Alternative","Retirees Standard","Retirees Supplemental","Retirees Tertiary"]},
-      {name:"custServiceNum", label:"Dedicated Customer Service Number", type:"tel", placeholder:"(800) 000-0000", value:"(800) 555-0148", source:"sf"},
+      {name:"custServiceNum", label:"Dedicated Customer Service Number", type:"tel", placeholder:"(800) 000-0000", value:"(800) 555-0148", source:"sf", validate:true},
       {name:"tinInd", label:"TIN Indicator", type:"select", options:["Client TIN","Benecard TIN"]},
-      {name:"tin", label:"TIN", type:"text", placeholder:"XX-XXXXXXX", value:"84-1029384", source:"sf"},
+      {name:"tin", label:"TIN", type:"text", placeholder:"XX-XXXXXXX", value:"84-1029384", source:"sf", validate:true},
       {name:"employerSize", label:"Employer Size", type:"select", options:["0-19 Employees","20-99 Employees","100+ Employees"], value:"100+ Employees", source:"sf"},
       {name:"smallEmpMedEx", label:"Small Employer Medicare Exception", type:"toggle", help:"Turn on if this client qualifies for the small-employer exception to Medicare Secondary Payer rules."},
     ]},
@@ -1094,7 +1106,7 @@ const STEPS = [
     ]},
     {title:"Invoice Configuration", fields:[
       {name:"daysTypeClaims", label:"Days Type — Claims", type:"select", options:["Business","Calendar","Custom"]},
-      {name:"daysDueClaims", label:"Days Due After Receipt — Claims", type:"number"},
+      {name:"daysDueClaims", label:"Days Due After Receipt — Claims", type:"number", validate:true},
       {name:"customDueClaims", label:"Custom Due Date — Claims", type:"text", placeholder:"e.g. Due Upon Receipt"},
       {name:"daysTypeAdmin", label:"Days Type — Admin", type:"select", options:["Business","Calendar","Custom"]},
       {name:"daysDueAdmin", label:"Days Due After Receipt — Admin", type:"number"},
@@ -1402,6 +1414,9 @@ function fieldHTML(f, uid){
   const label = `<label>${f.label}${help}${badge}</label>`;
   const span = f.span2 ? ' span2' : '';
   const val = f.value !== undefined ? f.value : '';
+  const vTarget = f.validate ? (f.validateTarget || uid) : null;
+  const vAttrs = vTarget ? ` onblur="runFieldValidation('${vTarget}')" oninput="clearFieldErrorIfNowValid('${vTarget}')"` : '';
+  const showsOwnError = f.validate && !f.validateTarget;
   let control = '';
   switch(f.type){
     case 'select':
@@ -1421,18 +1436,85 @@ function fieldHTML(f, uid){
       control = `<textarea id="${uid}" placeholder="${f.placeholder||''}">${val}</textarea>`;
       break;
     case 'number':
-      control = `<input type="number" id="${uid}" value="${val}" placeholder="${f.placeholder||''}">`;
+      control = `<input type="number" id="${uid}" value="${val}" placeholder="${f.placeholder||''}"${vAttrs}>`;
       break;
     case 'date':
-      control = `<input type="date" id="${uid}" value="${val}">`;
+      control = `<input type="date" id="${uid}" value="${val}"${vAttrs}>`;
       break;
     case 'tel':
-      control = `<input type="tel" id="${uid}" value="${val}" placeholder="${f.placeholder||''}">`;
+      control = `<input type="tel" id="${uid}" value="${val}" placeholder="${f.placeholder||''}"${vAttrs}>`;
       break;
     default:
-      control = `<input type="text" id="${uid}" value="${val}" placeholder="${f.placeholder||''}">`;
+      control = `<input type="text" id="${uid}" value="${val}" placeholder="${f.placeholder||''}"${vAttrs}>`;
   }
-  return `<div class="field${span}">${label}${control}</div>`;
+  const errorDiv = showsOwnError ? `<div class="field-error" id="${uid}-err"></div>` : '';
+  return `<div class="field${span}">${label}${control}${errorDiv}</div>`;
+}
+
+/* ============================================================
+   FIELD VALIDATION
+   Live front-end validation on a handful of Client & TPA Setup
+   fields — demonstrates format, phone, numeric-range, and
+   cross-field checks. Runs on blur (full check) and on input
+   (clears the error the moment the value becomes valid again).
+============================================================ */
+function validateFieldByUid(uid){
+  const el = document.getElementById(uid);
+  if(!el) return null;
+  const val = el.value.trim();
+
+  if(uid === 's1g1f4'){ // TIN
+    if(val === '') return null;
+    return /^\d{2}-\d{7}$/.test(val) ? null : "Enter the TIN as XX-XXXXXXX (e.g. 84-1029384).";
+  }
+  if(uid === 's1g1f2'){ // Dedicated Customer Service Number
+    if(val === '') return null;
+    return /^\(\d{3}\) \d{3}-\d{4}$/.test(val) ? null : "Enter the number as (800) 555-0148.";
+  }
+  if(uid === 's1g4f1'){ // Days Due After Receipt — Claims
+    if(val === '') return null;
+    const n = Number(val);
+    return (Number.isInteger(n) && n >= 0 && n <= 90) ? null : "Enter a whole number of days between 0 and 90.";
+  }
+  if(uid === 's1g0f11'){ // Contract End Date — must be on/after Contract Start Date
+    const startVal = document.getElementById('s1g0f10').value;
+    if(!val || !startVal) return null;
+    return val >= startVal ? null : "Contract End Date must be on or after the Contract Start Date.";
+  }
+  return null;
+}
+
+function setFieldValidity(uid, message){
+  const input = document.getElementById(uid);
+  if(!input) return;
+  const wrap = input.closest('.field');
+  const errEl = document.getElementById(uid+'-err');
+  if(message){
+    wrap.classList.add('has-error');
+    if(errEl) errEl.textContent = message;
+  } else {
+    wrap.classList.remove('has-error');
+    if(errEl) errEl.textContent = '';
+  }
+}
+
+function runFieldValidation(uid){
+  setFieldValidity(uid, validateFieldByUid(uid));
+}
+
+function clearFieldErrorIfNowValid(uid){
+  if(!validateFieldByUid(uid)) setFieldValidity(uid, null);
+}
+
+const STEP1_VALIDATION_UIDS = ['s1g1f4','s1g1f2','s1g4f1','s1g0f11'];
+function validateStep1(){
+  let firstInvalid = null;
+  STEP1_VALIDATION_UIDS.forEach(uid=>{
+    const message = validateFieldByUid(uid);
+    setFieldValidity(uid, message);
+    if(message && !firstInvalid) firstInvalid = uid;
+  });
+  return firstInvalid;
 }
 
 function renderNormalGroup(g, stepId, gi){
@@ -1902,6 +1984,16 @@ document.getElementById('backBtn').addEventListener('click', ()=>{
   if(currentStep>1) renderStep(currentStep-1);
 });
 document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(currentStep === 1){
+    const firstInvalid = validateStep1();
+    if(firstInvalid){
+      showToast('Fix the highlighted field(s) before continuing.');
+      const el = document.getElementById(firstInvalid);
+      el.focus();
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+  }
   completedSteps.add(currentStep);
   if(currentStep<10) renderStep(currentStep+1);
   else renderSidebar();
