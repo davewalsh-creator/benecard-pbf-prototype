@@ -624,10 +624,28 @@
   .stat-card.accent-green .num{color:var(--green);}
 
   .dash-note{
-    display:flex;align-items:center;gap:10px;
+    display:flex;align-items:flex-start;gap:10px;
     background:var(--surface);border:1px dashed var(--border-strong);border-radius:var(--radius-md);
     padding:12px 16px;font-size:12.5px;color:var(--ink-soft);margin-bottom:20px;
   }
+  .risk-agent-badge{
+    width:22px;height:22px;border-radius:7px;flex-shrink:0;margin-top:1px;
+    background:linear-gradient(135deg, var(--teal-blue), var(--green));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .risk-reason{display:flex;align-items:flex-start;gap:5px;margin-top:5px;font-size:11.5px;color:var(--ink-soft);line-height:1.4;max-width:260px;}
+  .risk-reason .why{
+    flex-shrink:0;margin-top:1px;width:14px;height:14px;border-radius:50%;
+    background:var(--surface-2);color:var(--ink-faint);font-size:9px;font-weight:700;
+    display:inline-flex;align-items:center;justify-content:center;cursor:help;position:relative;
+  }
+  .risk-reason .why .tip{
+    display:none;position:absolute;top:20px;left:0;
+    background:var(--ink);color:#fff;font-size:11px;font-weight:400;
+    padding:9px 12px;border-radius:8px;width:230px;line-height:1.5;
+    box-shadow:0 8px 20px rgba(0,0,0,.18);z-index:20;
+  }
+  .risk-reason .why:hover .tip{display:block;}
 
   .impl-table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);}
   .impl-table th{
@@ -1372,13 +1390,68 @@ let currentView = 'wizard';
 let currentClientName = 'Rivertown School District';
 
 const IMPLEMENTATIONS = [
-  {name:'Rivertown School District', goLive:'Oct 1, 2026', progress:62, status:'at-risk', statusLabel:'At Risk', owner:'Marcus Bell'},
-  {name:'Ashford County Government', goLive:'Jan 1, 2027', progress:15, status:'on-track', statusLabel:'On Track', owner:'Priya Natarajan'},
-  {name:'Whirley Industries', goLive:'Jul 1, 2026', progress:100, status:'complete', statusLabel:'Complete', owner:'Dana Whitfield'},
-  {name:'Toms River Municipal Utilities', goLive:'Sep 1, 2026', progress:40, status:'delayed', statusLabel:'Delayed', owner:'Marcus Bell'},
-  {name:'Heartland Logistics (Teamsters Local 830)', goLive:'Nov 1, 2026', progress:78, status:'on-track', statusLabel:'On Track', owner:'Priya Natarajan'},
-  {name:'SupplyRx Retiree Trust', goLive:'Jan 1, 2027', progress:5, status:'on-track', statusLabel:'On Track', owner:'Dana Whitfield'},
+  {name:'Rivertown School District', goLive:'Oct 1, 2026', goLiveInDays:85, owner:'Marcus Bell', totalSteps:10, stepsCompleted:6, validationFails:1, validationWarns:2, lastActivityDaysAgo:2},
+  {name:'Ashford County Government', goLive:'Jan 1, 2027', goLiveInDays:177, owner:'Priya Natarajan', totalSteps:10, stepsCompleted:2, validationFails:0, validationWarns:0, lastActivityDaysAgo:3},
+  {name:'Whirley Industries', goLive:'Jul 1, 2026', goLiveInDays:-7, owner:'Dana Whitfield', totalSteps:10, stepsCompleted:10, validationFails:0, validationWarns:0, lastActivityDaysAgo:9},
+  {name:'Toms River Municipal Utilities', goLive:'Sep 1, 2026', goLiveInDays:55, owner:'Marcus Bell', totalSteps:10, stepsCompleted:4, validationFails:0, validationWarns:1, lastActivityDaysAgo:16},
+  {name:'Heartland Logistics (Teamsters Local 830)', goLive:'Nov 1, 2026', goLiveInDays:116, owner:'Priya Natarajan', totalSteps:10, stepsCompleted:8, validationFails:0, validationWarns:0, lastActivityDaysAgo:4},
+  {name:'SupplyRx Retiree Trust', goLive:'Jan 1, 2027', goLiveInDays:177, owner:'Dana Whitfield', totalSteps:10, stepsCompleted:0, validationFails:0, validationWarns:0, lastActivityDaysAgo:1},
 ];
+
+/* ============================================================
+   PORTFOLIO RISK AGENT
+   Computes a status + plain-language reason per implementation
+   from validation results, pace to go-live, and staleness —
+   instead of a status label set by hand.
+============================================================ */
+function assessImplementationRisk(impl){
+  const {totalSteps, stepsCompleted, validationFails:fail, validationWarns:warn, goLiveInDays:daysToGoLive, lastActivityDaysAgo:daysSinceActivity} = impl;
+  const stepsRemaining = totalSteps - stepsCompleted;
+  const pace = stepsRemaining > 0 && daysToGoLive > 0 ? daysToGoLive / stepsRemaining : Infinity;
+  const signals = `${fail} validation failure(s) · ${warn} warning(s) · ${stepsRemaining} of ${totalSteps} steps remaining · ${daysToGoLive} day(s) to go-live · last activity ${daysSinceActivity} day(s) ago`;
+
+  let status, reason;
+  if(stepsRemaining === 0 && fail === 0 && warn === 0){
+    status = 'complete';
+    reason = `All ${totalSteps} steps complete with a clean validation pass.`;
+  } else if(stepsRemaining === 0){
+    status = 'at-risk';
+    reason = `All steps marked complete, but ${fail + warn} validation issue(s) must be resolved before this loads to PBF.`;
+  } else if(daysToGoLive < 0){
+    status = 'delayed';
+    reason = `Go-live date has passed with ${stepsRemaining} step(s) still open.`;
+  } else if(fail > 0 && daysToGoLive <= 21){
+    status = 'delayed';
+    reason = `${fail} validation failure(s) unresolved with only ${daysToGoLive} days until go-live.`;
+  } else if(daysSinceActivity >= 12){
+    status = 'delayed';
+    reason = `No changes in ${daysSinceActivity} days with ${stepsRemaining} step(s) still open — this implementation has stalled.`;
+  } else if(fail > 0){
+    status = 'at-risk';
+    reason = `${fail} validation failure(s) need resolution before this is ready for PBF load.`;
+  } else if(pace < 5){
+    status = 'delayed';
+    reason = `Only ${daysToGoLive} days left for ${stepsRemaining} remaining step(s) — behind the pace needed to hit go-live.`;
+  } else if(pace < 10){
+    status = 'at-risk';
+    reason = `${daysToGoLive} days left for ${stepsRemaining} remaining step(s) — pace is tightening.`;
+  } else if(warn >= 2){
+    status = 'at-risk';
+    reason = `${warn} validation warnings open — worth a look before go-live.`;
+  } else if(daysSinceActivity >= 7){
+    status = 'at-risk';
+    reason = `No changes in ${daysSinceActivity} days with ${stepsRemaining} step(s) remaining.`;
+  } else if(stepsCompleted === 0){
+    status = 'on-track';
+    reason = `Just getting started — ${stepsRemaining} step(s) remaining with ${daysToGoLive} days to go-live.`;
+  } else {
+    status = 'on-track';
+    reason = `On pace — ${stepsRemaining} step(s) remaining with ${daysToGoLive} days to go-live and no open validation failures.`;
+  }
+
+  const statusLabel = {'on-track':'On Track','at-risk':'At Risk','delayed':'Delayed','complete':'Complete'}[status];
+  return {status, statusLabel, reason, signals};
+}
 
 const CHANGE_LOG = [
   {ts:'Jul 6, 2026 · 3:42 PM', step:'Limits & Programs', field:'Mandatory Mail Program', from:'No', to:'Yes', by:'Marcus Bell'},
@@ -1498,12 +1571,18 @@ function renderDashboardView(){
   document.getElementById('stepSub').textContent = 'A live view across all active client implementations.';
   hideWizardChrome();
 
-  const onTrack = IMPLEMENTATIONS.filter(i=>i.status==='on-track').length;
-  const atRisk = IMPLEMENTATIONS.filter(i=>i.status==='at-risk').length;
-  const delayed = IMPLEMENTATIONS.filter(i=>i.status==='delayed').length;
+  const rows = IMPLEMENTATIONS.map(i=>({...i, risk: assessImplementationRisk(i), progress: Math.round(i.stepsCompleted/i.totalSteps*100)}));
+  const onTrack = rows.filter(r=>r.risk.status==='on-track').length;
+  const atRisk = rows.filter(r=>r.risk.status==='at-risk').length;
+  const delayed = rows.filter(r=>r.risk.status==='delayed').length;
 
   document.getElementById('content').innerHTML = `
-    <div class="dash-note">Status below is computed automatically from step completion — no manual color-coding required. <em>Illustrative data for this walkthrough.</em></div>
+    <div class="dash-note">
+      <span class="risk-agent-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/></svg>
+      </span>
+      <div><strong>Portfolio Risk Agent</strong> — status and the reason beside it are computed per client from validation results, pace to go-live, and days since last activity, not set by hand. Hover a reason for the full signal breakdown. <em>Illustrative data for this walkthrough.</em></div>
+    </div>
     <div class="stat-row">
       <div class="stat-card"><div class="num">${IMPLEMENTATIONS.length}</div><div class="lbl">Active Implementations</div></div>
       <div class="stat-card accent-green"><div class="num">${onTrack}</div><div class="lbl">On Track</div></div>
@@ -1513,12 +1592,18 @@ function renderDashboardView(){
     <table class="impl-table">
       <thead><tr><th>Client</th><th>Go-Live</th><th>Progress</th><th>Status</th><th>Owner</th></tr></thead>
       <tbody>
-        ${IMPLEMENTATIONS.map(i=>`<tr class="impl-row" onclick="openClient('${i.name.replace(/'/g,"\\'")}')">
-          <td class="impl-name">${i.name}</td>
-          <td>${i.goLive}</td>
-          <td><div class="mini-progress"><div class="mini-progress-fill" style="width:${i.progress}%"></div></div></td>
-          <td><span class="status-pill ${i.status}">${i.statusLabel}</span></td>
-          <td class="impl-owner">${i.owner}</td>
+        ${rows.map(r=>`<tr class="impl-row" onclick="openClient('${r.name.replace(/'/g,"\\'")}')">
+          <td class="impl-name">${r.name}</td>
+          <td>${r.goLive}</td>
+          <td><div class="mini-progress"><div class="mini-progress-fill" style="width:${r.progress}%"></div></div></td>
+          <td>
+            <span class="status-pill ${r.risk.status}">${r.risk.statusLabel}</span>
+            <div class="risk-reason">
+              <span>${r.risk.reason}</span>
+              <span class="why">?<span class="tip">${r.risk.signals}</span></span>
+            </div>
+          </td>
+          <td class="impl-owner">${r.owner}</td>
         </tr>`).join('')}
       </tbody>
     </table>
