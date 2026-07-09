@@ -518,9 +518,9 @@
   .mini-plan-row{display:flex;gap:8px;margin-bottom:10px;}
   .mini-plan-chip{flex:1;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:11.5px;font-weight:600;text-align:center;}
 
-  /* ===== AI Assist FAB ===== */
-  .ai-fab{
-    position:fixed;right:32px;bottom:88px;z-index:80;
+  /* ===== Q&A Chat panel (docked, not an overlay) ===== */
+  .chat-toggle{
+    position:fixed;right:32px;bottom:32px;z-index:80;
     width:56px;height:56px;border-radius:50%;
     background:linear-gradient(135deg, var(--teal-blue), var(--green));
     border:none;cursor:pointer;
@@ -528,56 +528,73 @@
     box-shadow:0 14px 28px -8px rgba(0,77,131,.45);
     transition:transform .15s ease, box-shadow .15s ease;
   }
-  .ai-fab:hover{transform:translateY(-2px);box-shadow:0 18px 34px -8px rgba(0,77,131,.55);}
-  .ai-fab svg{width:24px;height:24px;}
-  .ai-fab .ai-fab-label{
+  .chat-toggle:hover{transform:translateY(-2px);box-shadow:0 18px 34px -8px rgba(0,77,131,.55);}
+  .chat-toggle svg{width:24px;height:24px;}
+  .chat-toggle .chat-toggle-label{
     position:absolute;right:66px;top:50%;transform:translateY(-50%);
     background:var(--ink);color:#fff;font-size:12px;font-weight:600;
     padding:7px 12px;border-radius:8px;white-space:nowrap;display:none;
   }
-  .ai-fab:hover .ai-fab-label{display:block;}
+  .chat-toggle:hover .chat-toggle-label{display:block;}
 
-  /* ===== AI overlay ===== */
-  .ai-overlay{
-    position:fixed;inset:0;z-index:210;
-    background:rgba(3,20,35,.55);backdrop-filter:blur(3px);
-    display:flex;align-items:center;justify-content:center;padding:24px;
-    animation:onboardFadeIn .25s ease;
+  .chat-panel{
+    position:fixed;right:32px;bottom:100px;z-index:81;
+    width:360px;max-height:min(560px, calc(100vh - 140px));
+    background:var(--paper);border-radius:20px;
+    box-shadow:0 24px 60px rgba(0,20,30,.25);
+    display:flex;flex-direction:column;overflow:hidden;
+    border:1px solid var(--border);
+    animation:onboardPop .22s cubic-bezier(.2,.9,.3,1.2);
   }
-  .ai-overlay.hidden{display:none;}
-  .ai-card{
-    background:var(--paper);border-radius:26px;width:100%;max-width:460px;
-    box-shadow:0 30px 80px rgba(0,20,30,.35);padding:36px 36px 30px;
-    text-align:center;
-    animation:onboardPop .3s cubic-bezier(.2,.9,.3,1.2);
+  .chat-panel.hidden{display:none;}
+  .chat-head{
+    background:var(--navy);color:#fff;padding:16px 18px;
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
   }
-  .ai-badge{
-    width:60px;height:60px;border-radius:18px;margin:0 auto 20px;
+  .chat-head .chat-head-badge{
+    width:30px;height:30px;border-radius:9px;flex-shrink:0;
     background:linear-gradient(135deg, var(--teal-blue), var(--green));
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 12px 24px -8px rgba(0,77,131,.4);
   }
-  .ai-badge svg{width:28px;height:28px;}
-  .ai-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-blue);margin-bottom:8px;}
-  .ai-title{font-family:var(--font-display);font-size:20px;font-weight:600;margin:0 0 12px;line-height:1.3;}
-  .ai-body{font-size:13.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 26px;}
-  .ai-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
-  .ai-btn{
-    font-family:var(--font-body);font-weight:600;font-size:13.5px;
-    padding:12px 20px;border-radius:24px;border:1px solid var(--border-strong);
-    background:var(--paper);color:var(--ink);cursor:pointer;width:100%;
+  .chat-head .chat-head-badge svg{width:16px;height:16px;}
+  .chat-head .chat-head-text{flex:1;min-width:0;}
+  .chat-head .chat-head-text strong{display:block;font-family:var(--font-display);font-size:13.5px;font-weight:600;}
+  .chat-head .chat-head-text span{font-size:11px;color:rgba(255,255,255,.65);}
+  .chat-head .chat-close{background:none;border:none;color:rgba(255,255,255,.75);cursor:pointer;padding:4px;}
+  .chat-head .chat-close:hover{color:#fff;}
+
+  .chat-body{flex:1;overflow-y:auto;padding:16px;background:var(--surface);display:flex;flex-direction:column;gap:12px;}
+  .chat-msg{max-width:86%;font-size:13px;line-height:1.55;padding:10px 13px;border-radius:14px;}
+  .chat-msg.from-agent{align-self:flex-start;background:var(--paper);border:1px solid var(--border);color:var(--ink);border-bottom-left-radius:4px;}
+  .chat-msg.from-user{align-self:flex-end;background:var(--teal-blue);color:#fff;border-bottom-right-radius:4px;}
+  .chat-msg strong{font-weight:700;}
+  .chat-intro{font-size:12px;color:var(--ink-faint);text-align:center;margin-bottom:2px;}
+
+  .chat-suggestions{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+  .chat-suggestion{
+    text-align:left;background:var(--paper);border:1px solid var(--border-strong);
+    border-radius:12px;padding:9px 12px;font-size:12px;color:var(--teal-blue);font-weight:600;
+    cursor:pointer;transition:.12s;
   }
-  .ai-btn:hover{background:var(--surface);}
-  .ai-btn.primary{background:var(--green);border-color:var(--green);color:#fff;}
-  .ai-btn.primary:hover{background:#00722F;}
-  .ai-divider{height:1px;background:var(--border);margin:0 0 18px;}
-  .ai-help{
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    font-size:12.5px;color:var(--ink-soft);
+  .chat-suggestion:hover{background:var(--surface);border-color:var(--teal-blue);}
+
+  .chat-input-row{
+    display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);
+    background:var(--paper);flex-shrink:0;
   }
-  .ai-help a{color:var(--teal-blue);font-weight:600;text-decoration:none;}
-  .ai-help a:hover{text-decoration:underline;}
-  .ai-help svg{width:15px;height:15px;flex-shrink:0;}
+  .chat-input-row input{
+    flex:1;font-family:var(--font-body);font-size:13px;
+    padding:10px 13px;border:1px solid var(--border-strong);border-radius:20px;
+    background:var(--surface);color:var(--ink);
+  }
+  .chat-input-row input:focus{outline:none;border-color:var(--teal-blue);}
+  .chat-send{
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    background:var(--green);border:none;color:#fff;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .chat-send:hover{background:#00722F;}
+  .chat-foot-note{font-size:10.5px;color:var(--ink-faint);text-align:center;padding:0 14px 12px;background:var(--paper);}
 
   /* AI result banner shown in content */
   .ai-banner{
@@ -831,25 +848,28 @@
     </div>
   </div>
 
-  <!-- ================= AI ASSIST OVERLAY ================= -->
-  <div class="ai-overlay hidden" id="aiOverlay">
-    <div class="ai-card">
-      <div class="ai-badge">
+  <!-- ================= Q&A CHAT PANEL (docked, not an overlay) ================= -->
+  <div class="chat-panel hidden" id="chatPanel">
+    <div class="chat-head">
+      <div class="chat-head-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
       </div>
-      <div class="ai-eyebrow">AI Assist</div>
-      <h3 class="ai-title">Populate known information from public sources?</h3>
-      <p class="ai-body">Benecard PBF AI can check publicly available records — like a client's registered business address, employer size, and industry classification — and pre-fill matching fields on this step for you to review. Nothing is saved until you confirm each value.</p>
-      <div class="ai-btns">
-        <button class="ai-btn primary" onclick="applyAIFill()">Yes, populate for me</button>
-        <button class="ai-btn" onclick="closeAIOverlay()">Not now, I'll enter manually</button>
+      <div class="chat-head-text">
+        <strong>Setup Q&amp;A</strong>
+        <span>Ask about any field on this step</span>
       </div>
-      <div class="ai-divider"></div>
-      <div class="ai-help">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4A8.6 8.6 0 013 11.5 8.4 8.4 0 0111.9 3a8.5 8.5 0 019.1 8.5z"/><path d="M7 12l3 3 7-7"/></svg>
-        <span>Help needed? <a href="#" onclick="closeAIOverlay();showToast('In the full product, this opens a live chat with your implementation specialist.');return false;">Talk to your implementation specialist</a></span>
-      </div>
+      <button class="chat-close" onclick="closeChat()" title="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
     </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Ask a question…" onkeydown="if(event.key==='Enter')sendChatMessage()">
+      <button class="chat-send" onclick="sendChatMessage()" title="Send">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="chat-foot-note">Answers are canned for this preview — not a live model.</div>
   </div>
 
   <!-- ================= VALIDATE FOR PBF OVERLAY ================= -->
@@ -991,9 +1011,9 @@
         <button class="btn btn-primary" id="nextBtn">Save &amp; continue →</button>
       </div>
 
-      <button class="ai-fab" id="aiFabBtn" onclick="openAIOverlay()" title="AI Assist">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
-        <span class="ai-fab-label">AI Assist — populate from public sources</span>
+      <button class="chat-toggle" id="chatToggleBtn" onclick="toggleChat()" title="Setup Q&A">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4A8.6 8.6 0 013 11.5 8.4 8.4 0 0111.9 3a8.5 8.5 0 019.1 8.5z"/><path d="M8 10.5h8M8 14h5"/></svg>
+        <span class="chat-toggle-label">Ask a question about this step</span>
       </button>
     </div>
   </div>
@@ -1574,7 +1594,7 @@ function renderStep(stepId){
   document.getElementById('progressPct').textContent = Math.round(step.id/10*100)+'%';
   document.getElementById('validateBtn').style.display = 'inline-flex';
   document.getElementById('footerNav').style.display = 'flex';
-  document.getElementById('aiFabBtn').style.display = 'flex';
+  document.getElementById('chatToggleBtn').style.display = 'flex';
 
   const groupsHTML = step.groups.map((g,gi)=>{
     if(g.info) return renderInfoGroup(g);
@@ -1658,7 +1678,8 @@ function hideWizardChrome(){
   document.getElementById('progressWrap').style.display = 'none';
   document.getElementById('validateBtn').style.display = 'none';
   document.getElementById('footerNav').style.display = 'none';
-  document.getElementById('aiFabBtn').style.display = 'none';
+  document.getElementById('chatToggleBtn').style.display = 'none';
+  closeChat();
 }
 
 function renderHistoryView(){
@@ -1983,25 +2004,142 @@ function openOnboarding(){
 })();
 
 /* ============================================================
-   AI ASSIST
+   SETUP Q&A CHAT AGENT
+   Mocked — no live model. Answers are matched by keyword against
+   QA_LIBRARY, grounded in this form's actual help text, field
+   options, and current values (not generic canned filler).
 ============================================================ */
-function openAIOverlay(){ document.getElementById('aiOverlay').classList.remove('hidden'); }
-function closeAIOverlay(){ document.getElementById('aiOverlay').classList.add('hidden'); }
+const QA_LIBRARY = [
+  {
+    id:'daw',
+    prompt:"What's the difference between the DAW options for a plan?",
+    keywords:['daw','dispense as written','dispense-as-written','brand copay','generic copay'],
+    answer:`DAW (Dispense-As-Written) governs what happens when a doctor or member insists on brand instead of an available generic:<br>
+      • <strong>Standard Plan</strong> — no special handling, normal copay rules apply.<br>
+      • <strong>DAW / Mandatory Generic – Use Brand or Generic Copay</strong> — brand is still covered, you're just choosing which copay tier it's billed at.<br>
+      • <strong>DAW / Mandatory Generic – Exclude</strong> — the claim is rejected instead of paid at a different tier.<br>
+      PPO Base Plan is currently set to "DAW – Use Brand Copay" — brand is allowed, just billed at the brand rate.`
+  },
+  {
+    id:'erisa',
+    prompt:"Does ERISA apply to Rivertown School District?",
+    keywords:['erisa'],
+    answer:`Usually not. Rivertown's Line of Business is set to <strong>Government / Municipal</strong> (from Client &amp; TPA Setup), and ERISA only governs private-employer health plans — public-sector plans are exempt. You'd typically leave <strong>ERISA Group</strong> off and check <strong>Non-Federal Government Entity</strong> instead on the Healthcare Reform Status step.`
+  },
+  {
+    id:'tpa-end',
+    prompt:"How do I end a broker or TPA relationship without losing the history?",
+    keywords:['end date','tpa','broker','terminate','history','relationship'],
+    answer:`Don't delete the entry — add an <strong>End Date</strong> instead. Each TPA/Broker entry keeps its own Effective Date and End Date; leaving End Date blank means it's active, filling it in closes the relationship out as of that date while keeping the record. That's what gives you a full timeline instead of just an active/inactive flag. Same pattern applies to Group TPA Assignments on the Groups &amp; TPA step.`
+  },
+  {
+    id:'gpi',
+    prompt:"What does GPI-4 vs GPI-10 mean for starter dose look-back?",
+    keywords:['gpi','generic product identifier','look back level'],
+    answer:`GPI stands for <strong>Generic Product Identifier</strong> — a hierarchy for grouping drugs, from broad to narrow. <strong>GPI-4</strong> groups at a broader class level; <strong>GPI-10</strong> is the most specific grouping, basically the exact drug. Use a higher number when you want the starter-dose look-back to only catch a member's recent fills of that exact medication, not the whole class.`
+  },
+  {
+    id:'threshold',
+    prompt:"What's the Threshold Amount field for on Copays?",
+    keywords:['threshold amount','threshold','generics plus'],
+    answer:`Threshold Amount only matters if <strong>Rx Plan Type</strong> is set to <strong>Generics Plus</strong> — it's the dollar amount that decides when the plan switches from a flat generic copay to the plan's coinsurance logic. For any other Rx Plan Type, you can leave it blank.`
+  },
+  {
+    id:'moop-mpp',
+    prompt:"What's the difference between MOOP and Maximum Paid By Plan?",
+    keywords:['moop','maximum paid by plan','mpp','out-of-pocket'],
+    answer:`<strong>MOOP</strong> (Maximum Out-of-Pocket) caps what the <em>member</em> pays — once they hit it, the plan covers 100%. <strong>Maximum Paid By Plan (MPP)</strong> is the mirror image: it caps what the <em>plan</em> will pay, after which the member is responsible for the rest. Most commercial plans only use MOOP; MPP shows up more on capped/limited-benefit designs.`
+  },
+  {
+    id:'mandatory-mail',
+    prompt:"When should Mandatory Mail be turned on?",
+    keywords:['mandatory mail','mail order','allowable retail fills'],
+    answer:`Turn on <strong>Mandatory Mail Program</strong> when this client wants maintenance medications filled through mail order instead of retail after an initial grace period. Pair it with <strong>Allowable Retail Fills</strong> (retail fills allowed before mail becomes mandatory) and <strong>Look Back Days</strong> (how far back to check fill history) — 180 days is a common default.`
+  },
+  {
+    id:'small-employer',
+    prompt:"What does the Small Employer Medicare Exception toggle do?",
+    keywords:['small employer','medicare exception','medicare secondary payer'],
+    answer:`Turn this on if the client qualifies for the small-employer exception to <strong>Medicare Secondary Payer</strong> rules — generally employers under 20 employees. When it's on, Medicare can be treated as the primary payer for eligible members instead of this plan.`
+  },
+  {
+    id:'term-by-absence',
+    prompt:"What does Term By Absence do on a Group?",
+    keywords:['term by absence','eligibility file','absence'],
+    answer:`When <strong>Term By Absence</strong> is on, a member's coverage automatically ends if they stop appearing on the client's eligibility file — no manual termination needed. Leave it off if this client sends full eligibility files infrequently, since a member could otherwise be dropped in error between file loads.`
+  },
+];
+const QA_FALLBACK = `I don't have a canned answer for that in this preview build. Try asking about DAW options, ERISA, ending a TPA relationship, GPI look-back levels, MOOP vs. Maximum Paid By Plan, or Mandatory Mail.`;
 
-function applyAIFill(){
-  closeAIOverlay();
-  const content = document.getElementById('content');
-  const existing = document.getElementById('aiFillBanner');
+let chatStarted = false;
+
+function toggleChat(){
+  const panel = document.getElementById('chatPanel');
+  if(panel.classList.contains('hidden')) openChat();
+  else closeChat();
+}
+function openChat(){
+  document.getElementById('chatPanel').classList.remove('hidden');
+  if(!chatStarted) startChat();
+  document.getElementById('chatInput').focus();
+}
+function closeChat(){
+  document.getElementById('chatPanel').classList.add('hidden');
+}
+
+function startChat(){
+  chatStarted = true;
+  const body = document.getElementById('chatBody');
+  body.innerHTML = `<div class="chat-intro">Ask about any field, option, or workflow on this setup — try one below or type your own.</div>`;
+  appendChatMessage('agent', `Hi, I'm the Setup Q&amp;A assistant. I can explain jargon, field options, or how a step's data is used — grounded in this client's actual setup, not generic definitions.`);
+  const suggestions = document.createElement('div');
+  suggestions.className = 'chat-suggestions';
+  suggestions.id = 'chatSuggestions';
+  suggestions.innerHTML = QA_LIBRARY.slice(0,3).map(q=>
+    `<button class="chat-suggestion" onclick="askSuggestion('${q.id}')">${q.prompt}</button>`
+  ).join('');
+  body.appendChild(suggestions);
+  body.scrollTop = body.scrollHeight;
+}
+
+function appendChatMessage(role, html){
+  const body = document.getElementById('chatBody');
+  const msg = document.createElement('div');
+  msg.className = `chat-msg from-${role}`;
+  msg.innerHTML = html;
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+}
+
+function askSuggestion(id){
+  const existing = document.getElementById('chatSuggestions');
   if(existing) existing.remove();
-  const banner = document.createElement('div');
-  banner.className = 'ai-banner';
-  banner.id = 'aiFillBanner';
-  banner.innerHTML = `
-    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/></svg></span>
-    <span class="txt"><strong>AI found matches for 3 fields</strong> on this step from public records — review the values before saving.</span>
-    <button class="close" onclick="this.closest('.ai-banner').remove()">✕</button>
-  `;
-  content.insertBefore(banner, content.firstChild);
+  const q = QA_LIBRARY.find(x=>x.id===id);
+  if(!q) return;
+  appendChatMessage('user', q.prompt);
+  setTimeout(()=>appendChatMessage('agent', q.answer), 350);
+}
+
+function matchAnswer(text){
+  const lower = text.toLowerCase();
+  let best = null, bestScore = 0;
+  QA_LIBRARY.forEach(q=>{
+    const score = q.keywords.filter(k=>lower.includes(k)).length;
+    if(score > bestScore){ bestScore = score; best = q; }
+  });
+  return best ? best.answer : QA_FALLBACK;
+}
+
+function sendChatMessage(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const existing = document.getElementById('chatSuggestions');
+  if(existing) existing.remove();
+  appendChatMessage('user', text.replace(/</g,'&lt;'));
+  input.value = '';
+  const answer = matchAnswer(text);
+  setTimeout(()=>appendChatMessage('agent', answer), 400);
 }
 
 /* ============================================================
