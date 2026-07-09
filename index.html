@@ -772,6 +772,30 @@
   .extract-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);flex-wrap:wrap;}
   .extract-footer .ef-count{font-size:12.5px;color:var(--ink-soft);}
 
+  /* ===== Toast ===== */
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);
+    background:var(--ink);color:#fff;font-size:13px;font-weight:500;
+    padding:12px 22px;border-radius:24px;box-shadow:0 14px 30px rgba(0,0,0,.25);
+    opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
+    z-index:300;max-width:380px;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ===== Empty state (coming soon) ===== */
+  .empty-state{max-width:420px;margin:70px auto;text-align:center;}
+  .empty-state .es-ico{
+    width:60px;height:60px;border-radius:18px;margin:0 auto 20px;
+    background:var(--surface-2);color:var(--ink-faint);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .empty-state h3{font-family:var(--font-display);font-size:19px;font-weight:600;margin:0 0 10px;color:var(--ink);}
+  .empty-state p{font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin:0 0 22px;}
+
+  /* ===== Active filter state ===== */
+  .stat-card{cursor:pointer;transition:box-shadow .15s ease, border-color .15s ease;}
+  .stat-card.active{border-color:var(--teal-blue);box-shadow:0 0 0 2px rgba(0,106,130,.15), var(--shadow);}
+
   @media (max-width:900px){
     .stat-row{grid-template-columns:1fr 1fr;}
   }
@@ -823,7 +847,7 @@
       <div class="ai-divider"></div>
       <div class="ai-help">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4A8.6 8.6 0 013 11.5 8.4 8.4 0 0111.9 3a8.5 8.5 0 019.1 8.5z"/><path d="M7 12l3 3 7-7"/></svg>
-        <span>Help needed? <a href="#">Talk to your implementation specialist</a></span>
+        <span>Help needed? <a href="#" onclick="closeAIOverlay();showToast('In the full product, this opens a live chat with your implementation specialist.');return false;">Talk to your implementation specialist</a></span>
       </div>
     </div>
   </div>
@@ -852,6 +876,9 @@
     <div class="extract-card" id="extractCard"></div>
   </div>
 
+  <!-- ================= TOAST ================= -->
+  <div class="toast" id="toast"></div>
+
   <!-- ================= GLOBAL HEADER ================= -->
   <header class="app-header">
     <div class="header-left">
@@ -861,26 +888,25 @@
           <span>Client Workspace</span>
         </div>
       </div>
-      <nav class="header-nav">
-        <a href="#">Home</a>
-        <a href="#">Clients</a>
-        <a href="#" class="active">Implementations</a>
-        <a href="#">Reports</a>
-        <a href="#">Admin</a>
+      <nav class="header-nav" id="headerNav">
+        <a href="#" data-nav="dashboard" onclick="switchView('dashboard');return false;">Implementation Scorecard</a>
+        <a href="#" data-nav="wizard" onclick="switchView('wizard');return false;">Implementations</a>
+        <a href="#" data-nav="reports" onclick="openComingSoon('Reports','reports');return false;">Reports</a>
+        <a href="#" data-nav="admin" onclick="openComingSoon('Admin','admin');return false;">Admin</a>
       </nav>
     </div>
     <div class="header-right">
       <button class="icon-btn" title="Product tour" onclick="openOnboarding()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.2a2.5 2.5 0 014.9.8c0 1.7-2.4 2-2.4 3.5"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg>
       </button>
-      <button class="icon-btn" title="Search">
+      <button class="icon-btn" title="Search" onclick="showToast('Search isn\'t available in this preview build.')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       </button>
-      <button class="icon-btn" title="Notifications">
+      <button class="icon-btn" title="Notifications" onclick="showToast('No new notifications.')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 004 0"/></svg>
         <span class="dot"></span>
       </button>
-      <div class="avatar-menu">
+      <div class="avatar-menu" onclick="showToast('Account menu isn\'t available in this preview build.')">
         <div class="avatar">SG</div>
         <span class="name">Shannon G.</span>
         <span class="chev">▾</span>
@@ -893,23 +919,23 @@
 
     <!-- Icon rail: top-level app sections -->
     <nav class="icon-rail">
-      <button class="rail-btn" id="railHome" title="Home" onclick="switchView('dashboard')">
+      <button class="rail-btn" id="railHome" title="Implementation Scorecard" onclick="switchView('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
-        <span class="rail-label">Home</span>
+        <span class="rail-label">Implementation Scorecard</span>
       </button>
-      <button class="rail-btn" title="Clients">
+      <button class="rail-btn" id="railClients" title="Clients" onclick="switchView('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.9 2.9-6.2 6.5-6.2s6.5 2.3 6.5 6.2"/><circle cx="18" cy="9" r="2.4"/><path d="M16 13.3c2.6.3 4.5 2.2 4.5 5.2"/></svg>
         <span class="rail-label">Clients</span>
       </button>
-      <button class="rail-btn active" id="railImpl" title="Implementations" onclick="switchView('wizard')">
+      <button class="rail-btn" id="railImpl" title="Implementations" onclick="switchView('wizard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3.5h6v2H9z"/><path d="M9 11h6M9 15h6M9 19h3"/></svg>
         <span class="rail-label">Implementations</span>
       </button>
-      <button class="rail-btn" title="Reports">
+      <button class="rail-btn" id="railReports" title="Reports" onclick="openComingSoon('Reports','reports')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M11 20V4M18 20v-7M2.5 20h19"/></svg>
         <span class="rail-label">Reports</span>
       </button>
-      <button class="rail-btn" title="Settings">
+      <button class="rail-btn" id="railSettings" title="Settings" onclick="openComingSoon('Settings','settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
         <span class="rail-label">Settings</span>
       </button>
@@ -955,7 +981,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
           Validate for PBF
         </button>
-        <button class="btn">Save draft</button>
+        <button class="btn" onclick="showToast('Draft saved.')">Save draft</button>
       </div>
 
       <div class="content" id="content"></div>
@@ -976,9 +1002,9 @@
   <footer class="app-footer">
     <div class="foot-left">© 2026 Benecard Services, LLC · Client Workspace v0.1 (preliminary)</div>
     <div class="foot-links">
-      <a href="#">Help Center</a>
-      <a href="#">Privacy Policy</a>
-      <a href="#">System Status</a>
+      <a href="#" onclick="showToast('Help Center isn\'t available in this preview build.');return false;">Help Center</a>
+      <a href="#" onclick="showToast('Privacy Policy isn\'t available in this preview build.');return false;">Privacy Policy</a>
+      <a href="#" onclick="showToast('System Status isn\'t available in this preview build.');return false;">System Status</a>
     </div>
   </footer>
 
@@ -1542,7 +1568,6 @@ function renderStep(stepId){
 
   document.getElementById('breadcrumbBar').innerHTML = breadcrumbWizard(step.title);
   document.getElementById('stepHeading').textContent = step.title;
-  document.getElementById('stepNumLabel').textContent = step.id;
   document.getElementById('stepSub').innerHTML = `Step <span id="stepNumLabel">${step.id}</span> of 10`;
   document.getElementById('progressWrap').style.display = 'flex';
   document.getElementById('progressFill').style.width = (step.id/10*100)+'%';
@@ -1572,7 +1597,7 @@ function renderStep(stepId){
   document.getElementById('backBtn').style.opacity = step.id===1 ? .4 : 1;
   document.getElementById('nextBtn').textContent = step.id===10 ? 'Save & finish' : 'Save & continue →';
 
-  updateRailActive();
+  updateNavActive();
   renderSidebar();
   window.scrollTo(0,0);
 }
@@ -1592,6 +1617,41 @@ function switchView(view){
   if(view==='wizard'){ renderStep(currentStep); return; }
   if(view==='history') renderHistoryView();
   else if(view==='dashboard') renderDashboardView();
+}
+
+let toastTimer = null;
+function showToast(message){
+  const el = document.getElementById('toast');
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2800);
+}
+
+let comingSoonLabel = '';
+let comingSoonNavKey = '';
+function openComingSoon(label, navKey){
+  comingSoonLabel = label;
+  comingSoonNavKey = navKey || '';
+  renderComingSoon();
+}
+function renderComingSoon(){
+  currentView = 'comingsoon';
+  document.getElementById('breadcrumbBar').innerHTML = `<span class="current">${comingSoonLabel}</span>`;
+  document.getElementById('stepHeading').textContent = comingSoonLabel;
+  document.getElementById('stepSub').textContent = 'Not part of this preview build.';
+  hideWizardChrome();
+  document.getElementById('content').innerHTML = `
+    <div class="empty-state">
+      <div class="es-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.2a2.5 2.5 0 014.9.8c0 1.7-2.4 2-2.4 3.5"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg></div>
+      <h3>${comingSoonLabel} isn't in this preview</h3>
+      <p>This walkthrough focuses on the Implementation Scorecard and the client setup wizard. ${comingSoonLabel} would live here in the full build.</p>
+      <button class="btn btn-primary" onclick="switchView('dashboard')">Back to Scorecard</button>
+    </div>
+  `;
+  updateNavActive();
+  renderSidebar();
+  window.scrollTo(0,0);
 }
 
 function hideWizardChrome(){
@@ -1622,40 +1682,47 @@ function renderHistoryView(){
       </tbody>
     </table>
   `;
-  updateRailActive();
+  updateNavActive();
   renderSidebar();
   window.scrollTo(0,0);
 }
 
+let dashboardFilter = 'all';
+function setDashboardFilter(f){
+  dashboardFilter = f;
+  renderDashboardView();
+}
+
 function renderDashboardView(){
   currentView = 'dashboard';
-  document.getElementById('breadcrumbBar').innerHTML = `<span class="current">Implementations Overview</span>`;
-  document.getElementById('stepHeading').textContent = 'Implementations Overview';
-  document.getElementById('stepSub').textContent = 'A live view across all active client implementations.';
+  document.getElementById('breadcrumbBar').innerHTML = `<span class="current">Implementation Scorecard</span>`;
+  document.getElementById('stepHeading').textContent = 'Implementation Scorecard';
+  document.getElementById('stepSub').textContent = 'A live risk view across all active client implementations.';
   hideWizardChrome();
 
   const rows = IMPLEMENTATIONS.map(i=>({...i, risk: assessImplementationRisk(i), progress: Math.round(i.stepsCompleted/i.totalSteps*100)}));
   const onTrack = rows.filter(r=>r.risk.status==='on-track').length;
   const atRisk = rows.filter(r=>r.risk.status==='at-risk').length;
   const delayed = rows.filter(r=>r.risk.status==='delayed').length;
+  const filteredRows = dashboardFilter==='all' ? rows : rows.filter(r=>r.risk.status===dashboardFilter);
 
   document.getElementById('content').innerHTML = `
     <div class="dash-note">
       <span class="risk-agent-badge">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/></svg>
       </span>
-      <div><strong>Portfolio Risk Agent</strong> — status and the reason beside it are computed per client from validation results, pace to go-live, and days since last activity, not set by hand. Hover a reason for the full signal breakdown. <em>Illustrative data for this walkthrough.</em></div>
+      <div><strong>Portfolio Risk Agent</strong> — status and the reason beside it are computed per client from validation results, pace to go-live, and days since last activity, not set by hand. Hover a reason for the full signal breakdown, or click a tile below to filter. <em>Illustrative data for this walkthrough.</em></div>
     </div>
     <div class="stat-row">
-      <div class="stat-card"><div class="num">${IMPLEMENTATIONS.length}</div><div class="lbl">Active Implementations</div></div>
-      <div class="stat-card accent-green"><div class="num">${onTrack}</div><div class="lbl">On Track</div></div>
-      <div class="stat-card accent-amber"><div class="num">${atRisk}</div><div class="lbl">At Risk</div></div>
-      <div class="stat-card accent-danger"><div class="num">${delayed}</div><div class="lbl">Delayed</div></div>
+      <div class="stat-card ${dashboardFilter==='all'?'active':''}" onclick="setDashboardFilter('all')"><div class="num">${IMPLEMENTATIONS.length}</div><div class="lbl">Active Implementations</div></div>
+      <div class="stat-card accent-green ${dashboardFilter==='on-track'?'active':''}" onclick="setDashboardFilter('on-track')"><div class="num">${onTrack}</div><div class="lbl">On Track</div></div>
+      <div class="stat-card accent-amber ${dashboardFilter==='at-risk'?'active':''}" onclick="setDashboardFilter('at-risk')"><div class="num">${atRisk}</div><div class="lbl">At Risk</div></div>
+      <div class="stat-card accent-danger ${dashboardFilter==='delayed'?'active':''}" onclick="setDashboardFilter('delayed')"><div class="num">${delayed}</div><div class="lbl">Delayed</div></div>
     </div>
     <table class="impl-table">
       <thead><tr><th>Client</th><th>Go-Live</th><th>Progress</th><th>Status</th><th>Owner</th></tr></thead>
       <tbody>
-        ${rows.map(r=>`<tr class="impl-row" onclick="openClient('${r.name.replace(/'/g,"\\'")}')">
+        ${filteredRows.length ? filteredRows.map(r=>`<tr class="impl-row" onclick="openClient('${r.name.replace(/'/g,"\\'")}')">
           <td class="impl-name">${r.name}</td>
           <td>${r.goLive}</td>
           <td><div class="mini-progress"><div class="mini-progress-fill" style="width:${r.progress}%"></div></div></td>
@@ -1667,11 +1734,11 @@ function renderDashboardView(){
             </div>
           </td>
           <td class="impl-owner">${r.owner}</td>
-        </tr>`).join('')}
+        </tr>`).join('') : `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--ink-faint);">No implementations match this filter.</td></tr>`}
       </tbody>
     </table>
   `;
-  updateRailActive();
+  updateNavActive();
   renderSidebar();
   window.scrollTo(0,0);
 }
@@ -1683,29 +1750,49 @@ function openClient(name){
   switchView('wizard');
 }
 
-function updateRailActive(){
-  document.getElementById('railHome').classList.toggle('active', currentView==='dashboard');
-  document.getElementById('railImpl').classList.toggle('active', currentView!=='dashboard');
+function updateNavActive(){
+  const key = currentView==='comingsoon' ? comingSoonNavKey : (currentView==='dashboard' ? 'dashboard' : 'wizard');
+  document.getElementById('railHome').classList.toggle('active', key==='dashboard');
+  document.getElementById('railClients').classList.toggle('active', key==='dashboard');
+  document.getElementById('railImpl').classList.toggle('active', key==='wizard');
+  document.getElementById('railReports').classList.toggle('active', key==='reports');
+  document.getElementById('railSettings').classList.toggle('active', key==='settings');
+  document.querySelectorAll('#headerNav a').forEach(a=>a.classList.toggle('active', a.dataset.nav===key));
 }
 
 function renderSidebar(){
   const sidebar = document.getElementById('sidebar');
   if(currentView==='dashboard'){
+    const filters = [
+      {key:'all', label:'All'},
+      {key:'on-track', label:'On Track'},
+      {key:'at-risk', label:'At Risk'},
+      {key:'delayed', label:'Delayed'},
+      {key:'complete', label:'Complete'},
+    ];
     sidebar.innerHTML = `
       <div class="client-chip">
-        <div class="label">Overview</div>
-        <div class="name">All Implementations</div>
+        <div class="label">Scorecard</div>
+        <div class="name">Implementation Scorecard</div>
         <div class="meta">${IMPLEMENTATIONS.length} active &nbsp;·&nbsp; Illustrative data</div>
       </div>
       <div class="nav-label">Filter</div>
       <ul class="steps">
-        <li><button class="step-btn active"><span class="step-info"><span class="step-title">All</span></span></button></li>
-        <li><button class="step-btn"><span class="step-info"><span class="step-title">On Track</span></span></button></li>
-        <li><button class="step-btn"><span class="step-info"><span class="step-title">At Risk</span></span></button></li>
-        <li><button class="step-btn"><span class="step-info"><span class="step-title">Delayed</span></span></button></li>
-        <li><button class="step-btn"><span class="step-info"><span class="step-title">Complete</span></span></button></li>
+        ${filters.map(f=>`<li><button class="step-btn ${dashboardFilter===f.key?'active':''}" onclick="setDashboardFilter('${f.key}')"><span class="step-info"><span class="step-title">${f.label}</span></span></button></li>`).join('')}
       </ul>
-      <div class="sidebar-foot">Filters are illustrative in this preview</div>
+      <div class="sidebar-foot">Click a filter, or a stat tile above the table</div>
+    `;
+    return;
+  }
+
+  if(currentView==='comingsoon'){
+    sidebar.innerHTML = `
+      <div class="client-chip">
+        <div class="label">Section</div>
+        <div class="name">${comingSoonLabel}</div>
+        <div class="meta">Not in this preview build</div>
+      </div>
+      <div class="sidebar-foot"><button class="btn btn-ghost" style="padding:8px 4px;" onclick="switchView('dashboard')">← Back to Scorecard</button></div>
     `;
     return;
   }
@@ -2195,7 +2282,7 @@ function applyExtraction(){
   content.insertBefore(banner, content.firstChild);
 }
 
-renderStep(1);
+renderDashboardView();
 </script>
 </body>
 </html>
