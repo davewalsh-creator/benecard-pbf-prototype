@@ -675,9 +675,10 @@
   }
   .risk-reason .why svg{width:9px;height:9px;}
   .risk-reason .why .tip{
-    display:none;position:absolute;top:20px;left:0;
+    display:none;position:absolute;top:20px;right:0;
     background:var(--ink);color:#fff;font-size:11px;font-weight:400;
-    padding:9px 12px;border-radius:8px;width:230px;line-height:1.5;
+    padding:10px 13px;border-radius:8px;width:250px;line-height:1.7;
+    text-align:left;white-space:normal;
     box-shadow:0 8px 20px rgba(0,0,0,.18);z-index:20;
   }
   .risk-reason .why:hover .tip{display:block;}
@@ -1665,7 +1666,13 @@ function assessImplementationRisk(impl){
   const {totalSteps, stepsCompleted, validationFails:fail, validationWarns:warn, goLiveInDays:daysToGoLive, lastActivityDaysAgo:daysSinceActivity} = impl;
   const stepsRemaining = totalSteps - stepsCompleted;
   const pace = stepsRemaining > 0 && daysToGoLive > 0 ? daysToGoLive / stepsRemaining : Infinity;
-  const signals = `${fail} validation failure(s) · ${warn} warning(s) · ${stepsRemaining} of ${totalSteps} steps remaining · ${daysToGoLive} day(s) to go-live · last activity ${daysSinceActivity} day(s) ago`;
+  const signals = [
+    `${fail} validation failure(s)`,
+    `${warn} warning(s)`,
+    `${stepsRemaining} of ${totalSteps} steps remaining`,
+    `${daysToGoLive} day(s) to go-live`,
+    `Last activity ${daysSinceActivity} day(s) ago`,
+  ].map(line=>`• ${line}`).join('<br>');
 
   let status, reason;
   if(stepsRemaining === 0 && fail === 0 && warn === 0){
