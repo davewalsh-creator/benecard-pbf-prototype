@@ -807,6 +807,53 @@
   .extract-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);flex-wrap:wrap;}
   .extract-footer .ef-count{font-size:12.5px;color:var(--ink-soft);}
 
+  /* ===== Data Ingestion Agent ===== */
+  .ingest-card{max-width:600px;}
+  .ingest-source-list{display:flex;flex-direction:column;gap:10px;margin-bottom:8px;}
+  .ingest-source-row{
+    display:flex;align-items:center;gap:12px;cursor:pointer;
+    border:1.5px solid var(--border);border-radius:var(--radius-md);
+    padding:14px 16px;transition:.15s;
+  }
+  .ingest-source-row:hover{border-color:var(--teal-blue);background:var(--surface);}
+  .ingest-source-row.checked{border-color:var(--teal-blue);background:var(--surface);}
+  .ingest-source-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);flex-shrink:0;cursor:pointer;}
+  .ingest-source-icon{
+    width:32px;height:32px;border-radius:9px;flex-shrink:0;
+    background:var(--surface-2);color:var(--teal-blue);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ingest-source-text{flex:1;min-width:0;}
+  .ingest-source-text strong{display:block;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .ingest-source-text span{font-size:11.5px;color:var(--ink-soft);}
+  .ingest-source-row.ingest-source-all{background:var(--surface);}
+
+  .ingest-subpanel{
+    margin:-2px 0 0 44px;padding:12px 14px 14px;
+    border-left:2px solid var(--border-strong);
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .ingest-subpanel label{font-size:12px;font-weight:600;color:var(--ink);}
+  .ingest-subpanel[hidden]{display:none;}
+
+  .ingest-yesno{display:flex;gap:8px;}
+  .ingest-yesno-btn{
+    flex:1;font-family:var(--font-body);font-weight:600;font-size:13px;
+    padding:9px 14px;border:2px solid var(--border-strong);border-radius:0;
+    background:var(--paper);color:var(--ink);cursor:pointer;transition:.15s;
+  }
+  .ingest-yesno-btn.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+  .ingest-row{display:flex;align-items:flex-start;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border);}
+  .ingest-row:last-child{border-bottom:none;}
+  .ingest-approve-toggle{display:flex;flex-shrink:0;border:1.5px solid var(--border-strong);border-radius:20px;overflow:hidden;}
+  .ingest-av-btn{
+    font-family:var(--font-body);font-weight:600;font-size:11px;
+    padding:6px 12px;border:none;background:var(--paper);color:var(--ink-soft);cursor:pointer;
+  }
+  .ingest-av-btn.approve.active{background:var(--green);color:#fff;}
+  .ingest-av-btn.reject.active{background:var(--danger);color:#fff;}
+
   /* ===== Toast ===== */
   .toast{
     position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);
@@ -909,9 +956,9 @@
     </div>
   </div>
 
-  <!-- ================= PLAN DOCUMENT EXTRACTION OVERLAY ================= -->
-  <div class="extract-overlay hidden" id="extractOverlay">
-    <div class="extract-card" id="extractCard"></div>
+  <!-- ================= DATA INGESTION AGENT OVERLAY ================= -->
+  <div class="extract-overlay hidden" id="ingestOverlay">
+    <div class="extract-card ingest-card" id="ingestCard"></div>
   </div>
 
   <!-- ================= TOAST ================= -->
@@ -1015,6 +1062,10 @@
           <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
           <div class="progress-pct" id="progressPct">10%</div>
         </div>
+        <button class="btn" id="ingestBtn" onclick="openIngestOverlay()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.5l-4.7 1.9L12 16l-1.8-4.6L5.5 9.5l4.7-1.9L12 3z"/></svg>
+          Ingest Data
+        </button>
         <button class="btn" id="validateBtn" onclick="openValidate()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
           Validate for PBF
@@ -1169,7 +1220,7 @@ const STEPS = [
   ]
 },
 {
-  id:3, title:"Plans", sub:"Tab 3 · Plans", docExtract:true,
+  id:3, title:"Plans", sub:"Tab 3 · Plans",
   eyebrow:"Plan Design",
   intro:"Define every plan this client offers. Everything from Groups onward will reference the plans you set up here — a client can have more than one.",
   groups:[
@@ -1300,7 +1351,7 @@ const STEPS = [
   ]
 },
 {
-  id:8, title:"Formulary & Utilization", sub:"Tab 8 · Frmly-Step-PA-Qty-HC Reform", docExtract:true,
+  id:8, title:"Formulary & Utilization", sub:"Tab 8 · Frmly-Step-PA-Qty-HC Reform",
   eyebrow:"Utilization Management",
   intro:"Which drug list this client follows, when a prior authorization or step therapy is required, and healthcare-reform status flags.",
   groups:[
@@ -1339,7 +1390,7 @@ const STEPS = [
   ]
 },
 {
-  id:9, title:"Accumulators", sub:"Tab 9 · Accums-Maximizer", docExtract:true,
+  id:9, title:"Accumulators", sub:"Tab 9 · Accums-Maximizer",
   eyebrow:"Deductibles & Out-of-Pocket",
   intro:"Deductibles, out-of-pocket maximums, and any copay assistance / maximizer programs.",
   groups:[
@@ -1374,7 +1425,7 @@ const STEPS = [
   ]
 },
 {
-  id:10, title:"Copays", sub:"Tab 10 · Copays_1", docExtract:true,
+  id:10, title:"Copays", sub:"Tab 10 · Copays_1",
   eyebrow:"Member Cost Share",
   intro:"What members pay at the register — flat copays, percentage coinsurance, or a mix — by drug type and category.",
   groups:[
@@ -1690,6 +1741,7 @@ function renderStep(stepId){
   document.getElementById('progressFill').style.width = (step.id/10*100)+'%';
   document.getElementById('progressPct').textContent = Math.round(step.id/10*100)+'%';
   document.getElementById('validateBtn').style.display = 'inline-flex';
+  document.getElementById('ingestBtn').style.display = 'inline-flex';
   document.getElementById('footerNav').style.display = 'flex';
   showChat('wizard');
 
@@ -1706,7 +1758,6 @@ function renderStep(stepId){
       <h2>${step.title}</h2>
       <p>${step.intro}</p>
     </div>
-    ${step.docExtract ? renderExtractBanner(step.id) : ''}
     ${groupsHTML}
   `;
 
@@ -1775,6 +1826,7 @@ function renderComingSoon(){
 function hideWizardChrome(){
   document.getElementById('progressWrap').style.display = 'none';
   document.getElementById('validateBtn').style.display = 'none';
+  document.getElementById('ingestBtn').style.display = 'none';
   document.getElementById('footerNav').style.display = 'none';
 }
 
@@ -2323,94 +2375,173 @@ function sendChatMessage(){
 ============================================================ */
 const EXTRACT_DOC_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>`;
 
-const EXTRACTION_PROFILES = {
+/* Data Ingestion Agent — per-step suggested values, each tagged with
+   which source type it's grounded in (document / call / other) so the
+   review panel can be filtered to whatever the user actually selected. */
+const INGEST_PROFILES = {
+  1: { // Client & TPA Setup
+    entryCounts: {},
+    fields: [
+      {gi:0, fi:3, value:'Denise Carrano', confidence:'Medium', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:0, fi:10, value:'2026-07-01', confidence:'High', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:0, fi:11, value:'2027-06-30', confidence:'High', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:1, fi:1, value:'Wellness Program', confidence:'Medium', src:'call', source:'Client mentioned wanting a wellness incentive tier'},
+      {gi:1, fi:6, value:false, confidence:'Low', src:'document', source:'New Client Intake Form, p.2'},
+      {gi:2, ei:0, fi:0, value:'Kissler & Associates', confidence:'High', src:'document', source:'Broker Submission.xlsx'},
+      {gi:2, ei:0, fi:1, value:'Broker', confidence:'High', src:'document', source:'Broker Submission.xlsx'},
+      {gi:2, ei:0, fi:3, value:'2026-07-01', confidence:'Medium', src:'document', source:'Broker Submission.xlsx'},
+      {gi:3, fi:0, value:'Detail', confidence:'Medium', src:'call', source:'Client asked for line-item detail on every invoice'},
+      {gi:3, fi:7, value:'Send a duplicate invoice copy to the district CFO’s office each billing cycle.', confidence:'Medium', src:'call', source:'Noted 24 min into the call'},
+      {gi:4, fi:0, value:'Calendar', confidence:'Low', src:'other', source:'Per client’s onboarding spreadsheet'},
+      {gi:4, fi:1, value:30, confidence:'Low', src:'other', source:'Per client’s onboarding spreadsheet'},
+    ]
+  },
+  2: { // Contacts & Billing
+    entryCounts: {},
+    fields: [
+      {gi:0, fi:5, value:'4821', confidence:'Medium', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:0, fi:7, value:'2026-07-01', confidence:'High', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:1, fi:0, value:'215 Rivertown Pkwy', confidence:'Medium', src:'document', source:'New Client Intake Form, p.1 (same as mailing address)'},
+      {gi:1, fi:2, value:'Rivertown', confidence:'Medium', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:1, fi:3, value:'NJ', confidence:'Medium', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:1, fi:4, value:'08753', confidence:'Medium', src:'document', source:'New Client Intake Form, p.1'},
+      {gi:2, ei:0, fi:1, value:'Rivertown Main Billing Group', confidence:'Medium', src:'call', source:'Client referred to this as their "main group"'},
+      {gi:2, ei:0, fi:3, value:'Monthly', confidence:'High', src:'call', source:'Confirmed on the call'},
+      {gi:2, ei:0, fi:5, value:'ACH Debit', confidence:'High', src:'call', source:'Confirmed on the call'},
+      {gi:3, ei:0, fi:0, value:'Billing', confidence:'High', src:'document', source:'New Client Intake Form, p.2'},
+      {gi:3, ei:0, fi:1, value:'Karen', confidence:'High', src:'document', source:'New Client Intake Form, p.2'},
+      {gi:3, ei:0, fi:2, value:'Diaz', confidence:'High', src:'document', source:'New Client Intake Form, p.2'},
+      {gi:3, ei:0, fi:6, value:'kdiaz@rivertownsd.org', confidence:'Medium', src:'document', source:'New Client Intake Form, p.2'},
+    ]
+  },
   3: { // Plans
     entryCounts: {0:2},
     fields: [
-      {gi:0, ei:0, fi:0, value:'PPO Base Plan', confidence:'High', source:'§2.1 Plan Options'},
-      {gi:0, ei:0, fi:1, value:true, confidence:'High', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:0, fi:2, value:true, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:0, fi:3, value:false, confidence:'Medium', source:'§4.2 Retiree Eligibility'},
-      {gi:0, ei:0, fi:4, value:'As Of End Of Birth Year', confidence:'High', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:0, fi:5, value:26, confidence:'High', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:0, fi:6, value:'As Of End Of Birth Year', confidence:'Medium', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:0, fi:7, value:26, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:0, fi:8, value:'DAW – Use Brand Copay', confidence:'High', source:'§4.4 Dispense As Written'},
-      {gi:0, ei:0, fi:9, value:'Both', confidence:'Medium', source:'§4.4 Dispense As Written'},
-      {gi:0, ei:0, fi:10, value:'Pharmacy Level', confidence:'Low', source:'§4.5 Direct Claims'},
+      {gi:0, ei:0, fi:0, value:'PPO Base Plan', confidence:'High', src:'document', source:'§2.1 Plan Options'},
+      {gi:0, ei:0, fi:1, value:true, confidence:'High', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:2, value:true, confidence:'Medium', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:3, value:false, confidence:'Medium', src:'document', source:'§4.2 Retiree Eligibility'},
+      {gi:0, ei:0, fi:4, value:'As Of End Of Birth Year', confidence:'High', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:5, value:26, confidence:'High', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:6, value:'As Of End Of Birth Year', confidence:'Medium', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:7, value:26, confidence:'Medium', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:0, fi:8, value:'DAW – Use Brand Copay', confidence:'High', src:'document', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:0, fi:9, value:'Both', confidence:'Medium', src:'document', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:0, fi:10, value:'Pharmacy Level', confidence:'Low', src:'document', source:'§4.5 Direct Claims'},
 
-      {gi:0, ei:1, fi:0, value:'HDHP Plan', confidence:'High', source:'§2.1 Plan Options'},
-      {gi:0, ei:1, fi:1, value:true, confidence:'High', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:1, fi:2, value:true, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:1, fi:3, value:false, confidence:'Medium', source:'§4.2 Retiree Eligibility'},
-      {gi:0, ei:1, fi:4, value:'As Of End Of Birth Year', confidence:'High', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:1, fi:5, value:26, confidence:'High', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:1, fi:6, value:'As Of End Of Birth Year', confidence:'Medium', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:1, fi:7, value:26, confidence:'Medium', source:'§4.1 Dependent Eligibility'},
-      {gi:0, ei:1, fi:8, value:'Mandatory Generic – Use Brand Copay', confidence:'High', source:'§4.4 Dispense As Written'},
-      {gi:0, ei:1, fi:9, value:'Both', confidence:'Medium', source:'§4.4 Dispense As Written'},
-      {gi:0, ei:1, fi:10, value:'Pharmacy Level', confidence:'Low', source:'§4.5 Direct Claims'},
+      {gi:0, ei:1, fi:0, value:'HDHP Plan', confidence:'High', src:'document', source:'§2.1 Plan Options'},
+      {gi:0, ei:1, fi:1, value:true, confidence:'High', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:2, value:true, confidence:'Medium', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:3, value:false, confidence:'Medium', src:'document', source:'§4.2 Retiree Eligibility'},
+      {gi:0, ei:1, fi:4, value:'As Of End Of Birth Year', confidence:'High', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:5, value:26, confidence:'High', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:6, value:'As Of End Of Birth Year', confidence:'Medium', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:7, value:26, confidence:'Medium', src:'document', source:'§4.1 Dependent Eligibility'},
+      {gi:0, ei:1, fi:8, value:'Mandatory Generic – Use Brand Copay', confidence:'High', src:'document', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:1, fi:9, value:'Both', confidence:'Medium', src:'document', source:'§4.4 Dispense As Written'},
+      {gi:0, ei:1, fi:10, value:'Pharmacy Level', confidence:'Low', src:'document', source:'§4.5 Direct Claims'},
+    ]
+  },
+  4: { // Groups & TPA
+    entryCounts: {},
+    fields: [
+      {gi:0, ei:0, fi:1, value:'Rivertown Teachers Union', confidence:'Medium', src:'call', source:'Client referred to this group by name'},
+      {gi:0, ei:0, fi:2, value:'GRP-1001', confidence:'Medium', src:'document', source:'Census File.xlsx'},
+      {gi:0, ei:0, fi:3, value:'Standard', confidence:'High', src:'document', source:'Census File.xlsx'},
+      {gi:0, ei:0, fi:7, value:true, confidence:'Medium', src:'call', source:'Client wants auto-term on eligibility gaps'},
+      {gi:0, ei:0, fi:9, value:'2026-10-01', confidence:'High', src:'document', source:'Census File.xlsx'},
+      {gi:1, ei:0, fi:1, value:'Kissler & Associates', confidence:'Medium', src:'document', source:'Broker Submission.xlsx'},
+      {gi:1, ei:0, fi:2, value:'Eligibility', confidence:'Medium', src:'document', source:'Broker Submission.xlsx'},
+      {gi:1, ei:0, fi:3, value:'2026-10-01', confidence:'Medium', src:'document', source:'Broker Submission.xlsx'},
+    ]
+  },
+  5: { // Drug Coverage
+    entryCounts: {},
+    fields: [
+      {gi:0, fi:0, value:'Standard Coverage Template', confidence:'Medium', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:0, fi:1, value:'ALL PLANS', confidence:'High', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:0, fi:2, value:false, confidence:'Medium', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:2, fi:0, value:'Compounds excluded from Mail; covered at Retail with prior authorization.', confidence:'Medium', src:'call', source:'Discussed on the discovery call'},
+      {gi:3, fi:0, value:'PC – Contraceptives covered ages 10–100, no PA required per ACA mandate.', confidence:'Low', src:'other', source:'Per client’s benefits summary'},
+    ]
+  },
+  6: { // Special Instructions
+    entryCounts: {},
+    fields: [
+      {gi:0, fi:0, value:'ALL PLANS', confidence:'Medium', src:'call', source:'Mentioned on the kickoff call'},
+      {gi:0, fi:1, value:'Member services should escalate any COBRA questions directly to Karen Diaz rather than the standard queue.', confidence:'Medium', src:'call', source:'Noted 41 min into the call'},
+      {gi:1, fi:0, value:'ALL PLANS', confidence:'Medium', src:'document', source:'New Client Intake Form, p.4'},
+      {gi:1, fi:1, value:'Client requires 48-hour notice before any planned system maintenance affecting claims processing.', confidence:'Medium', src:'document', source:'New Client Intake Form, p.4'},
+    ]
+  },
+  7: { // Limits & Programs
+    entryCounts: {},
+    fields: [
+      {gi:0, ei:0, fi:1, value:'Retail', confidence:'Medium', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:0, ei:0, fi:2, value:30, confidence:'Medium', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:0, ei:0, fi:5, value:99, confidence:'Low', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:1, fi:0, value:true, confidence:'Medium', src:'call', source:'Client asked for mandatory mail on maintenance meds'},
+      {gi:1, fi:4, value:180, confidence:'Low', src:'other', source:'Per client’s onboarding spreadsheet'},
+      {gi:2, ei:0, fi:1, value:'Maintenance 30', confidence:'Medium', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:2, ei:0, fi:4, value:'GPI-4', confidence:'Low', src:'document', source:'New Client Intake Form, p.3'},
+      {gi:3, ei:0, fi:1, value:'CPN Toms River', confidence:'Medium', src:'document', source:'Broker Submission.xlsx'},
     ]
   },
   8: { // Formulary & Utilization
     entryCounts: {},
     fields: [
-      {gi:0, fi:0, value:'Standard Formulary', confidence:'High', source:'§5.2 Covered Drug List'},
-      {gi:1, fi:0, value:'Enabled', confidence:'High', source:'§5.4 Step Therapy Requirements'},
-      {gi:1, fi:2, value:true, confidence:'Medium', source:'§5.4 Step Therapy Requirements'},
-      {gi:2, fi:0, value:'Standard PA List', confidence:'Medium', source:'§5.5 Prior Authorization'},
-      {gi:2, fi:2, value:true, confidence:'Low', source:'§5.5 Prior Authorization'},
-      {gi:3, fi:0, value:'Standard QL', confidence:'Medium', source:'§5.6 Quantity Limits'},
-      {gi:4, fi:0, value:true, confidence:'High', source:'§9.1 Plan Administration (ERISA)'},
-      {gi:4, fi:3, value:true, confidence:'Medium', source:'§9.3 Affordable Care Act Compliance'},
-      {gi:5, fi:0, value:'Standard Exclusion List', confidence:'Low', source:'§5.7 Excluded Drugs'},
+      {gi:0, fi:0, value:'Standard Formulary', confidence:'High', src:'document', source:'§5.2 Covered Drug List'},
+      {gi:1, fi:0, value:'Enabled', confidence:'High', src:'document', source:'§5.4 Step Therapy Requirements'},
+      {gi:1, fi:2, value:true, confidence:'Medium', src:'document', source:'§5.4 Step Therapy Requirements'},
+      {gi:2, fi:0, value:'Standard PA List', confidence:'Medium', src:'document', source:'§5.5 Prior Authorization'},
+      {gi:2, fi:2, value:true, confidence:'Low', src:'document', source:'§5.5 Prior Authorization'},
+      {gi:3, fi:0, value:'Standard QL', confidence:'Medium', src:'document', source:'§5.6 Quantity Limits'},
+      {gi:4, fi:0, value:true, confidence:'High', src:'document', source:'§9.1 Plan Administration (ERISA)'},
+      {gi:4, fi:3, value:true, confidence:'Medium', src:'document', source:'§9.3 Affordable Care Act Compliance'},
+      {gi:5, fi:0, value:'Standard Exclusion List', confidence:'Low', src:'document', source:'§5.7 Excluded Drugs'},
     ]
   },
   9: { // Accumulators
     entryCounts: {},
     fields: [
-      {gi:0, ei:0, fi:0, value:'ALL PLANS', confidence:'High', source:'§6.1 Deductible'},
-      {gi:0, ei:0, fi:1, value:'Annual Deductible', confidence:'Medium', source:'§6.1 Deductible'},
-      {gi:0, ei:0, fi:2, value:'Calendar Year', confidence:'High', source:'§6.1 Deductible'},
-      {gi:0, ei:0, fi:3, value:250, confidence:'High', source:'§6.1 Deductible'},
-      {gi:0, ei:0, fi:4, value:500, confidence:'High', source:'§6.1 Deductible'},
-      {gi:1, ei:0, fi:0, value:'ALL PLANS', confidence:'High', source:'§6.3 Maximum Out-of-Pocket'},
-      {gi:1, ei:0, fi:1, value:'Out-of-Pocket Maximum', confidence:'Medium', source:'§6.3 Maximum Out-of-Pocket'},
-      {gi:1, ei:0, fi:2, value:4500, confidence:'High', source:'§6.3 Maximum Out-of-Pocket'},
-      {gi:1, ei:0, fi:3, value:9000, confidence:'High', source:'§6.3 Maximum Out-of-Pocket'},
+      {gi:0, ei:0, fi:0, value:'ALL PLANS', confidence:'High', src:'document', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:1, value:'Annual Deductible', confidence:'Medium', src:'document', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:2, value:'Calendar Year', confidence:'High', src:'document', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:3, value:250, confidence:'High', src:'document', source:'§6.1 Deductible'},
+      {gi:0, ei:0, fi:4, value:500, confidence:'High', src:'document', source:'§6.1 Deductible'},
+      {gi:1, ei:0, fi:0, value:'ALL PLANS', confidence:'High', src:'document', source:'§6.3 Maximum Out-of-Pocket'},
+      {gi:1, ei:0, fi:1, value:'Out-of-Pocket Maximum', confidence:'Medium', src:'document', source:'§6.3 Maximum Out-of-Pocket'},
+      {gi:1, ei:0, fi:2, value:4500, confidence:'High', src:'document', source:'§6.3 Maximum Out-of-Pocket'},
+      {gi:1, ei:0, fi:3, value:9000, confidence:'High', src:'document', source:'§6.3 Maximum Out-of-Pocket'},
     ]
   },
   10: { // Copays
     entryCounts: {1:3},
     fields: [
-      {gi:0, fi:1, value:'3-Tier', confidence:'High', source:'§7.1 Prescription Drug Copayments'},
-      {gi:0, fi:3, value:true, confidence:'Medium', source:'§7.1 Prescription Drug Copayments'},
-      {gi:0, fi:5, value:true, confidence:'Low', source:'§7.1 Prescription Drug Copayments'},
+      {gi:0, fi:1, value:'3-Tier', confidence:'High', src:'document', source:'§7.1 Prescription Drug Copayments'},
+      {gi:0, fi:3, value:true, confidence:'Medium', src:'document', source:'§7.1 Prescription Drug Copayments'},
+      {gi:0, fi:5, value:true, confidence:'Low', src:'document', source:'§7.1 Prescription Drug Copayments'},
 
-      {gi:1, ei:0, fi:0, value:'Retail', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:0, fi:1, value:'Generic', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:0, fi:2, value:30, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:0, fi:3, value:'Flat', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:0, fi:4, value:12, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:0, value:'Retail', confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:1, value:'Generic', confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:2, value:30, confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:3, value:'Flat', confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:0, fi:4, value:12, confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
 
-      {gi:1, ei:1, fi:0, value:'Retail', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:1, fi:1, value:'Brand', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:1, fi:2, value:30, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:1, fi:3, value:'Flat', confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
-      {gi:1, ei:1, fi:4, value:45, confidence:'High', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:0, value:'Retail', confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:1, value:'Brand', confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:2, value:30, confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:3, value:'Flat', confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
+      {gi:1, ei:1, fi:4, value:45, confidence:'High', src:'document', source:'§7.2 Copayment Schedule, Table 3'},
 
-      {gi:1, ei:2, fi:0, value:'Mail', confidence:'Medium', source:'§7.3 Mail Order Copayments'},
-      {gi:1, ei:2, fi:1, value:'Generic', confidence:'Medium', source:'§7.3 Mail Order Copayments'},
-      {gi:1, ei:2, fi:2, value:90, confidence:'Medium', source:'§7.3 Mail Order Copayments'},
-      {gi:1, ei:2, fi:3, value:'Flat', confidence:'Medium', source:'§7.3 Mail Order Copayments'},
-      {gi:1, ei:2, fi:4, value:24, confidence:'Medium', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:0, value:'Mail', confidence:'Medium', src:'document', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:1, value:'Generic', confidence:'Medium', src:'document', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:2, value:90, confidence:'Medium', src:'document', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:3, value:'Flat', confidence:'Medium', src:'document', source:'§7.3 Mail Order Copayments'},
+      {gi:1, ei:2, fi:4, value:24, confidence:'Medium', src:'document', source:'§7.3 Mail Order Copayments'},
     ]
   }
 };
-
-let extractOverlayStep = null;
-let extractFileMeta = null;
-let extractFields = [];
 
 function getFieldMeta(stepId, gi, fi){
   return STEPS.find(s=>s.id===stepId).groups[gi].fields[fi];
@@ -2419,88 +2550,226 @@ function getGroupMeta(stepId, gi){
   return STEPS.find(s=>s.id===stepId).groups[gi];
 }
 
-function renderExtractBanner(stepId){
-  return `<div class="card" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;">
-    <div style="display:flex;gap:14px;align-items:center;">
-      <div class="extract-badge" style="margin-bottom:0;width:40px;height:40px;border-radius:12px;">${EXTRACT_DOC_ICON}</div>
-      <div>
-        <div style="font-weight:600;font-size:14px;">Have a signed Plan Document for this client?</div>
-        <div style="font-size:12.5px;color:var(--ink-soft);">Upload it and this step's fields can be drafted automatically — you'll review every value before it's saved.</div>
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="openExtractOverlay(${stepId})">Extract from Plan Document</button>
-  </div>`;
+/* ============================================================
+   DATA INGESTION AGENT
+   Invokable from every wizard step. User picks one or more source
+   types (Documents / Call Transcripts / Other), the agent "reads"
+   them, then drafts field suggestions for whichever step is
+   currently open — filtered to the sources actually selected —
+   with per-row Approve/Reject before anything is applied.
+============================================================ */
+const INGEST_ICON_DOC = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>`;
+const INGEST_ICON_CALL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>`;
+const INGEST_ICON_OTHER = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`;
+const INGEST_ICON_ALL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`;
+const INGEST_ROW_IDS = {documents:'srcDocuments', calls:'srcCalls', other:'srcOther'};
+
+let ingestState = {sources:{documents:false, calls:false, other:false}, sharepointPath:'', otherText:'', callAnswer:true};
+let ingestFields = [];
+let ingestDecisions = [];
+
+function openIngestOverlay(){
+  ingestState = {sources:{documents:false, calls:false, other:false}, sharepointPath:'', otherText:'', callAnswer:true};
+  document.getElementById('ingestOverlay').classList.remove('hidden');
+  renderIngestSourceSelect();
+}
+function closeIngestOverlay(){
+  document.getElementById('ingestOverlay').classList.add('hidden');
 }
 
-function openExtractOverlay(stepId){
-  extractOverlayStep = stepId;
-  document.getElementById('extractOverlay').classList.remove('hidden');
-  renderExtractUpload();
-}
-function closeExtractOverlay(){
-  document.getElementById('extractOverlay').classList.add('hidden');
-}
-
-function renderExtractUpload(){
-  document.getElementById('extractCard').innerHTML = `
+function renderIngestSourceSelect(){
+  const step = STEPS.find(s=>s.id===currentStep);
+  document.getElementById('ingestCard').innerHTML = `
     <div class="extract-badge">${EXTRACT_DOC_ICON}</div>
-    <div class="extract-eyebrow">Plan Document Extraction</div>
-    <h3 class="extract-title">Upload a Plan Document</h3>
-    <p class="extract-body">Upload the client's signed Summary Plan Description or master group agreement (PDF). This step's fields will be drafted from it — nothing saves until you review and confirm each value.</p>
-    <label class="extract-drop" for="extractFileInput">
-      <input type="file" accept="application/pdf" id="extractFileInput" onchange="handleExtractFile(event)">
-      <div class="dz-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
-      <div class="dz-title">Click to choose a PDF</div>
-      <div class="dz-sub">Nothing is uploaded anywhere in this preview build</div>
-    </label>
+    <div class="extract-eyebrow">Data Ingestion Agent</div>
+    <h3 class="extract-title">Where should we pull data from?</h3>
+    <p class="extract-body">Select one or more sources for <strong>${step.title}</strong>. You'll review every suggested value before anything is saved.</p>
+    <div class="ingest-source-list">
+      <label class="ingest-source-row" id="rowDocuments">
+        <input type="checkbox" id="srcDocuments" onchange="toggleIngestSource('documents')">
+        <span class="ingest-source-icon">${INGEST_ICON_DOC}</span>
+        <span class="ingest-source-text"><strong>Documents</strong><span>SharePoint files — intake forms, census, broker submissions</span></span>
+      </label>
+      <div class="ingest-subpanel" id="docsSubpanel" hidden>
+        <label for="sharepointInput">SharePoint location</label>
+        <input type="text" id="sharepointInput" list="sharepointClientList" placeholder="Start typing a client name…" oninput="onIngestTextInput()" onkeydown="handleIngestEnter(event)">
+        <datalist id="sharepointClientList">${IMPLEMENTATIONS.map(i=>`<option value="/Clients/${i.name}/Implementation Docs">`).join('')}</datalist>
+        <div class="field-hint">e.g. /Clients/${currentClientName}/Implementation Docs</div>
+      </div>
+
+      <label class="ingest-source-row" id="rowCalls">
+        <input type="checkbox" id="srcCalls" onchange="toggleIngestSource('calls')">
+        <span class="ingest-source-icon">${INGEST_ICON_CALL}</span>
+        <span class="ingest-source-text"><strong>Call Transcripts</strong><span>Discovery, kickoff, and renewal calls</span></span>
+      </label>
+      <div class="ingest-subpanel" id="callsSubpanel" hidden>
+        <label>Do you have call transcripts available for this implementation?</label>
+        <div class="ingest-yesno">
+          <button type="button" class="ingest-yesno-btn active" id="callYesBtn" onclick="setCallAnswer(true)">Yes</button>
+          <button type="button" class="ingest-yesno-btn" id="callNoBtn" onclick="setCallAnswer(false)">No</button>
+        </div>
+      </div>
+
+      <label class="ingest-source-row" id="rowOther">
+        <input type="checkbox" id="srcOther" onchange="toggleIngestSource('other')">
+        <span class="ingest-source-icon">${INGEST_ICON_OTHER}</span>
+        <span class="ingest-source-text"><strong>Other</strong><span>Emails, spreadsheets, anything else</span></span>
+      </label>
+      <div class="ingest-subpanel" id="otherSubpanel" hidden>
+        <label for="otherInput">Describe the source</label>
+        <input type="text" id="otherInput" placeholder="e.g. onboarding spreadsheet from the broker" oninput="onIngestTextInput()" onkeydown="handleIngestEnter(event)">
+      </div>
+
+      <label class="ingest-source-row ingest-source-all" id="rowAll">
+        <input type="checkbox" id="srcAll" onchange="toggleIngestAll()">
+        <span class="ingest-source-icon">${INGEST_ICON_ALL}</span>
+        <span class="ingest-source-text"><strong>Select All</strong><span>Use every available source</span></span>
+      </label>
+    </div>
     <div class="extract-footer">
       <span></span>
-      <button class="btn" onclick="closeExtractOverlay()">Cancel</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn" onclick="closeIngestOverlay()">Cancel</button>
+        <button class="btn btn-primary" id="ingestContinueBtn" onclick="startIngestParsing()" disabled>Continue</button>
+      </div>
     </div>
   `;
 }
 
-function handleExtractFile(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  extractFileMeta = {name:file.name, sizeKb: Math.max(1, Math.round(file.size/1024))};
-  renderExtractParsing();
-  setTimeout(renderExtractReview, 1700);
+function rowIdFor(type){ return 'row' + type[0].toUpperCase() + type.slice(1); }
+
+function toggleIngestSource(type){
+  const checked = document.getElementById(INGEST_ROW_IDS[type]).checked;
+  ingestState.sources[type] = checked;
+  document.getElementById(rowIdFor(type)).classList.toggle('checked', checked);
+  updateIngestSubpanels();
+  updateSelectAllCheckbox();
+  updateIngestContinueState();
 }
 
-function renderExtractParsing(){
-  document.getElementById('extractCard').innerHTML = `
+function toggleIngestAll(){
+  const checked = document.getElementById('srcAll').checked;
+  ['documents','calls','other'].forEach(type=>{
+    ingestState.sources[type] = checked;
+    document.getElementById(INGEST_ROW_IDS[type]).checked = checked;
+    document.getElementById(rowIdFor(type)).classList.toggle('checked', checked);
+  });
+  updateIngestSubpanels();
+  updateIngestContinueState();
+}
+
+function updateSelectAllCheckbox(){
+  const all = ['documents','calls','other'].every(t=>ingestState.sources[t]);
+  document.getElementById('srcAll').checked = all;
+  document.getElementById('rowAll').classList.toggle('checked', all);
+}
+
+function updateIngestSubpanels(){
+  document.getElementById('docsSubpanel').hidden = !ingestState.sources.documents;
+  document.getElementById('callsSubpanel').hidden = !ingestState.sources.calls;
+  document.getElementById('otherSubpanel').hidden = !ingestState.sources.other;
+}
+
+function setCallAnswer(yes){
+  ingestState.callAnswer = yes;
+  document.getElementById('callYesBtn').classList.toggle('active', yes);
+  document.getElementById('callNoBtn').classList.toggle('active', !yes);
+}
+
+function onIngestTextInput(){
+  const sp = document.getElementById('sharepointInput');
+  const ot = document.getElementById('otherInput');
+  if(sp) ingestState.sharepointPath = sp.value;
+  if(ot) ingestState.otherText = ot.value;
+  updateIngestContinueState();
+}
+
+function handleIngestEnter(event){
+  if(event.key === 'Enter'){
+    event.preventDefault();
+    const btn = document.getElementById('ingestContinueBtn');
+    if(btn && !btn.disabled) startIngestParsing();
+  }
+}
+
+function updateIngestContinueState(){
+  const anySelected = ingestState.sources.documents || ingestState.sources.calls || ingestState.sources.other;
+  const docsBlocked = ingestState.sources.documents && !ingestState.sharepointPath.trim();
+  const btn = document.getElementById('ingestContinueBtn');
+  if(btn) btn.disabled = !anySelected || docsBlocked;
+}
+
+function startIngestParsing(){
+  renderIngestParsing();
+}
+
+function renderIngestParsing(){
+  const parts = [];
+  if(ingestState.sources.documents) parts.push(`SharePoint (${ingestState.sharepointPath || 'client folder'})`);
+  if(ingestState.sources.calls) parts.push('call transcripts');
+  if(ingestState.sources.other) parts.push(`"${ingestState.otherText || 'other source'}"`);
+  document.getElementById('ingestCard').innerHTML = `
     <div class="extract-badge">${EXTRACT_DOC_ICON}</div>
-    <div class="extract-eyebrow">Plan Document Extraction</div>
-    <h3 class="extract-title">Reading ${extractFileMeta.name}…</h3>
-    <p class="extract-body">Scanning for plan design, copay, accumulator, and formulary language relevant to this step.</p>
+    <div class="extract-eyebrow">Data Ingestion Agent</div>
+    <h3 class="extract-title">Reading ${parts.join(' + ')}…</h3>
+    <p class="extract-body">Scanning for language relevant to this step.</p>
     <div class="extract-progress-track"><div class="extract-progress-fill" id="extractProgressFill"></div></div>
-    <div class="extract-status-line" id="extractStatusLine">Parsing document text…</div>
+    <div class="extract-status-line" id="extractStatusLine">Scanning selected sources…</div>
   `;
   requestAnimationFrame(()=>{
     const fill = document.getElementById('extractProgressFill');
     if(fill) fill.style.width = '100%';
   });
-  ['Parsing document text…','Matching sections to setup fields…','Drafting field values…'].forEach((line,i)=>{
+  ['Scanning selected sources…','Cross-referencing against this step…','Drafting suggested values…'].forEach((line,i)=>{
     setTimeout(()=>{
       const el = document.getElementById('extractStatusLine');
       if(el) el.textContent = line;
     }, i*550);
   });
+  setTimeout(renderIngestReview, 1700);
 }
 
-function renderExtractReview(){
-  const stepId = extractOverlayStep;
-  const profile = EXTRACTION_PROFILES[stepId];
-  extractFields = profile.fields.map((f,idx)=>{
+function ingestCitation(src){
+  if(src === 'document') return ingestState.sharepointPath ? `SharePoint: ${ingestState.sharepointPath}` : 'Document';
+  if(src === 'call') return 'Call Transcript';
+  if(src === 'other') return ingestState.otherText ? `Other: "${ingestState.otherText}"` : 'Other Source';
+  return 'Source';
+}
+
+function renderIngestReview(){
+  const stepId = currentStep;
+  const profile = INGEST_PROFILES[stepId];
+  const step = STEPS.find(s=>s.id===stepId);
+  const selectedTypes = [];
+  if(ingestState.sources.documents) selectedTypes.push('document');
+  if(ingestState.sources.calls && ingestState.callAnswer) selectedTypes.push('call');
+  if(ingestState.sources.other) selectedTypes.push('other');
+
+  const matched = (profile ? profile.fields : []).filter(f => selectedTypes.includes(f.src));
+  ingestFields = matched.map((f,idx)=>{
     const meta = getFieldMeta(stepId, f.gi, f.fi);
     const group = getGroupMeta(stepId, f.gi);
     return {...f, idx, label:meta.label, type:meta.type, groupTitle:group.title};
   });
+  ingestDecisions = ingestFields.map(()=>true);
+
+  if(!ingestFields.length){
+    document.getElementById('ingestCard').innerHTML = `
+      <div class="extract-badge">${EXTRACT_DOC_ICON}</div>
+      <div class="extract-eyebrow">Data Ingestion Agent</div>
+      <h3 class="extract-title">Nothing found for this step</h3>
+      <p class="extract-body">The selected source(s) didn't have anything relevant to <strong>${step.title}</strong>. Try a different source, or continue filling this step manually.</p>
+      <div class="extract-footer">
+        <span></span>
+        <button class="btn btn-primary" onclick="closeIngestOverlay()">Close</button>
+      </div>
+    `;
+    return;
+  }
 
   let rowsHtml = '';
   let lastGroupKey = null;
-  extractFields.forEach(f=>{
+  ingestFields.forEach(f=>{
     const groupKey = `${f.gi}-${f.ei ?? ''}`;
     if(groupKey !== lastGroupKey){
       const entryLabel = f.ei !== undefined ? `${f.groupTitle} — Entry ${f.ei+1}` : f.groupTitle;
@@ -2510,44 +2779,57 @@ function renderExtractReview(){
     let displayVal = f.value;
     if(f.type === 'toggle') displayVal = f.value ? 'Yes' : 'No';
     else if(f.label.includes('($)')) displayVal = `$${f.value}`;
-    rowsHtml += `<div class="extract-row">
-      <input type="checkbox" id="ex-${f.idx}" checked onchange="updateExtractSelectedCount()">
+    rowsHtml += `<div class="ingest-row">
       <div class="er-body">
         <div class="er-label">${f.label} <span class="confidence-badge ${f.confidence.toLowerCase()}">${f.confidence} confidence</span></div>
         <div class="er-value">${displayVal}</div>
-        <div class="er-source">Source: ${extractFileMeta.name} — ${f.source}</div>
+        <div class="er-source">${ingestCitation(f.src)} — ${f.source}</div>
+      </div>
+      <div class="ingest-approve-toggle" id="av-${f.idx}">
+        <button type="button" class="ingest-av-btn approve active" onclick="setIngestDecision(${f.idx}, true)">Approve</button>
+        <button type="button" class="ingest-av-btn reject" onclick="setIngestDecision(${f.idx}, false)">Reject</button>
       </div>
     </div>`;
   });
 
-  document.getElementById('extractCard').innerHTML = `
+  document.getElementById('ingestCard').innerHTML = `
     <div class="extract-badge">${EXTRACT_DOC_ICON}</div>
-    <div class="extract-eyebrow">Plan Document Extraction</div>
-    <h3 class="extract-title">Review extracted values</h3>
-    <div class="extract-summary">Found ${extractFields.length} value(s) in <strong>${extractFileMeta.name}</strong> (~${extractFileMeta.sizeKb} KB) relevant to this step. Uncheck anything you don't want applied.</div>
+    <div class="extract-eyebrow">Data Ingestion Agent</div>
+    <h3 class="extract-title">Review suggested values</h3>
+    <div class="extract-summary">Found ${ingestFields.length} value(s) relevant to <strong>${step.title}</strong> from the selected source(s). Reject anything you don't want applied.</div>
     ${rowsHtml}
-    <div class="extract-not-found">Fields not listed above weren't clearly stated in the document — complete those manually.</div>
+    <div class="extract-not-found">Fields not listed above weren't clearly stated in the selected source(s) — complete those manually.</div>
     <div class="extract-footer">
-      <span class="ef-count" id="extractSelectedCount"></span>
+      <span class="ef-count" id="ingestApprovedCount"></span>
       <div style="display:flex;gap:10px;">
-        <button class="btn" onclick="closeExtractOverlay()">Discard</button>
-        <button class="btn btn-primary" onclick="applyExtraction()">Apply selected</button>
+        <button class="btn" onclick="closeIngestOverlay()">Discard</button>
+        <button class="btn btn-primary" onclick="applyIngestion()">Apply approved</button>
       </div>
     </div>
   `;
-  updateExtractSelectedCount();
+  updateIngestApprovedCount();
 }
 
-function updateExtractSelectedCount(){
-  const el = document.getElementById('extractSelectedCount');
+function setIngestDecision(idx, approved){
+  ingestDecisions[idx] = approved;
+  const toggle = document.getElementById(`av-${idx}`);
+  if(toggle){
+    toggle.querySelector('.approve').classList.toggle('active', approved);
+    toggle.querySelector('.reject').classList.toggle('active', !approved);
+  }
+  updateIngestApprovedCount();
+}
+
+function updateIngestApprovedCount(){
+  const el = document.getElementById('ingestApprovedCount');
   if(!el) return;
-  const checked = document.querySelectorAll('#extractCard input[type=checkbox]:checked').length;
-  el.textContent = `${checked} of ${extractFields.length} selected`;
+  const approved = ingestDecisions.filter(Boolean).length;
+  el.textContent = `${approved} of ${ingestDecisions.length} approved`;
 }
 
-function applyExtraction(){
-  const stepId = extractOverlayStep;
-  const profile = EXTRACTION_PROFILES[stepId];
+function applyIngestion(){
+  const stepId = currentStep;
+  const profile = INGEST_PROFILES[stepId];
 
   Object.entries(profile.entryCounts).forEach(([gi, count])=>{
     const key = `${stepId}-${gi}`;
@@ -2556,9 +2838,8 @@ function applyExtraction(){
   });
 
   let appliedCount = 0;
-  extractFields.forEach(f=>{
-    const cb = document.getElementById(`ex-${f.idx}`);
-    if(!cb || !cb.checked) return;
+  ingestFields.forEach((f, idx)=>{
+    if(!ingestDecisions[idx]) return;
     const uid = f.ei !== undefined ? `s${stepId}g${f.gi}e${f.ei}f${f.fi}` : `s${stepId}g${f.gi}f${f.fi}`;
     const el = document.getElementById(uid);
     if(!el) return;
@@ -2576,16 +2857,16 @@ function applyExtraction(){
     appliedCount++;
   });
 
-  closeExtractOverlay();
+  closeIngestOverlay();
   const content = document.getElementById('content');
-  const existing = document.getElementById('extractFillBanner');
+  const existing = document.getElementById('ingestFillBanner');
   if(existing) existing.remove();
   const banner = document.createElement('div');
   banner.className = 'ai-banner';
-  banner.id = 'extractFillBanner';
+  banner.id = 'ingestFillBanner';
   banner.innerHTML = `
     <span class="ico">${EXTRACT_DOC_ICON}</span>
-    <span class="txt"><strong>Applied ${appliedCount} value(s)</strong> extracted from ${extractFileMeta.name} — review before saving.</span>
+    <span class="txt"><strong>Applied ${appliedCount} value(s)</strong> from the Data Ingestion Agent — review before saving.</span>
     <button class="close" onclick="this.closest('.ai-banner').remove()">✕</button>
   `;
   content.insertBefore(banner, content.firstChild);
