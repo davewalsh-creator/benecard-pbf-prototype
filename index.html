@@ -1072,7 +1072,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
           Validate for PBF
         </button>
-        <button class="btn" onclick="showToast('Draft saved.')">Save draft</button>
+        <button class="btn" id="saveDraftBtn" onclick="showToast('Draft saved.')">Save draft</button>
       </div>
 
       <div class="content" id="content"></div>
@@ -1750,6 +1750,7 @@ function renderStep(stepId){
   document.getElementById('progressPct').textContent = Math.round(step.id/10*100)+'%';
   document.getElementById('validateBtn').style.display = 'inline-flex';
   document.getElementById('ingestBtn').style.display = 'inline-flex';
+  document.getElementById('saveDraftBtn').style.display = 'inline-flex';
   document.getElementById('footerNav').style.display = 'flex';
   showChat('wizard');
 
@@ -1835,6 +1836,7 @@ function hideWizardChrome(){
   document.getElementById('progressWrap').style.display = 'none';
   document.getElementById('validateBtn').style.display = 'none';
   document.getElementById('ingestBtn').style.display = 'none';
+  document.getElementById('saveDraftBtn').style.display = 'none';
   document.getElementById('footerNav').style.display = 'none';
 }
 
