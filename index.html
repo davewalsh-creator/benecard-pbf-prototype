@@ -59,7 +59,7 @@
   .header-logo{display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .header-logo-plate{background:#fff;border-radius:6px;padding:6px 12px;display:flex;align-items:center;}
   .header-logo-img{height:26px;width:auto;display:block;}
-  .header-logo-sub{font-size:10.5px;color:rgba(255,255,255,.55);}
+  .header-logo-sub{font-size:12.5px;font-weight:700;color:#fff;letter-spacing:.02em;}
   .header-nav{display:flex;gap:2px;}
   .header-nav a{
     color:rgba(255,255,255,.68);
@@ -885,7 +885,7 @@
   }
 
   @media (max-width:900px){
-    .app{grid-template-columns:1fr;}
+    .app{grid-template-columns:minmax(0,1fr);}
     .icon-rail{display:none;}
     .sidebar{display:none;}
     .content{padding:24px 20px 100px;}
@@ -894,6 +894,26 @@
     .header-nav{display:none;}
     .app-footer{padding:16px 20px;}
     .breadcrumb-bar{padding:14px 20px 0;}
+  }
+
+  /* ===== Narrow phone chrome fixes ===== */
+  @media (max-width:600px){
+    .app-header{padding:0 12px;}
+    .header-left{gap:14px;}
+    .header-logo-sub{display:none;}
+    .header-right{gap:4px;}
+    .icon-btn[title="Product tour"]{display:none;}
+    .avatar-menu .name,.avatar-menu .chev{display:none;}
+    .avatar-menu{padding:4px;}
+    .stat-row{grid-template-columns:1fr;}
+    .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -20px;padding:0 20px;}
+    .table-scroll .impl-table{min-width:720px;}
+    .table-scroll .hist-table{min-width:620px;}
+    .chat-panel{width:calc(100vw - 32px);right:16px;left:16px;bottom:140px;}
+    .chat-toggle{right:16px;}
+    .app-footer{flex-direction:column;align-items:flex-start;}
+    .app-footer .foot-links{margin-left:0;}
+    .app-footer .foot-links a{margin-left:0;margin-right:16px;}
   }
 </style>
 </head>
@@ -1858,6 +1878,7 @@ function renderHistoryView(){
   hideChat();
   document.getElementById('content').innerHTML = `
     <div class="dash-note"><strong>${CHANGE_LOG.length} changes tracked</strong>&nbsp;since setup began — captured automatically, replacing manual version-tracking across spreadsheet copies.</div>
+    <div class="table-scroll">
     <table class="hist-table">
       <thead><tr><th>When</th><th>Step</th><th>Field</th><th>Change</th><th>Changed By</th></tr></thead>
       <tbody>
@@ -1870,6 +1891,7 @@ function renderHistoryView(){
         </tr>`).join('')}
       </tbody>
     </table>
+    </div>
   `;
   updateNavActive();
   renderSidebar();
@@ -1909,6 +1931,7 @@ function renderDashboardView(){
       <div class="stat-card accent-amber ${dashboardFilter==='at-risk'?'active':''}" onclick="setDashboardFilter('at-risk')"><div class="num">${atRisk}</div><div class="lbl">At Risk</div></div>
       <div class="stat-card accent-danger ${dashboardFilter==='delayed'?'active':''}" onclick="setDashboardFilter('delayed')"><div class="num">${delayed}</div><div class="lbl">Delayed</div></div>
     </div>
+    <div class="table-scroll">
     <table class="impl-table">
       <thead><tr><th>Client</th><th>Go-Live</th><th>Progress</th><th>Status</th><th>Owner</th></tr></thead>
       <tbody>
@@ -1927,6 +1950,7 @@ function renderDashboardView(){
         </tr>`).join('') : `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--ink-faint);">No implementations match this filter.</td></tr>`}
       </tbody>
     </table>
+    </div>
   `;
   updateNavActive();
   renderSidebar();
